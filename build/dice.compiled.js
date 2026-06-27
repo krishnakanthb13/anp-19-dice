@@ -69,13 +69,9 @@ async function basic_default(app) {
     min = null,
     max = null,
     keep = null,
-    // { highest: true/false, count: number }
     drop = null,
-    // { highest: true/false, count: number }
     explode = null,
-    // { target: number, reroll: boolean }
     sort = null,
-    // "asc" or "desc"
     unique = false
   } = {}) {
     const rollSingleDie = () => Math.floor(Math.random() * faces) + 1;
@@ -115,19 +111,28 @@ async function basic_default(app) {
       total: rolls.reduce((sum, roll) => sum + roll, 0)
     };
   }
-  async function sortNotesByLookUp(lookUp, pickNote) {
-    let notesByGroup;
-    try {
-      notesByGroup = await app.filterNotes({});
-      if (!notesByGroup || !Array.isArray(notesByGroup)) {
+  async function sortNotesByLookUp(lookUp, pickNote, preFetchedNotes) {
+    let notesByGroup = preFetchedNotes;
+    if (!notesByGroup) {
+      try {
+        notesByGroup = await app.filterNotes({});
+        if (!notesByGroup || !Array.isArray(notesByGroup)) {
+          notesByGroup = [];
+        }
+      } catch (error) {
+        console.error("Error fetching notes:", error);
         notesByGroup = [];
+        return null;
       }
-    } catch (error) {
-      console.error("Error fetching notes:", error);
-      notesByGroup = [];
+    }
+    notesByGroup = notesByGroup.filter((note) => {
+      if (!note || typeof note !== "object") return false;
+      return note.uuid || note.name || note.created || note.updated;
+    });
+    if (notesByGroup.length === 0) {
+      console.log("No valid notes available.");
       return null;
     }
-    notesByGroup = notesByGroup.filter((note) => note !== null && note !== void 0);
     switch (lookUp) {
       case 1:
         notesByGroup.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
@@ -167,8 +172,8 @@ async function basic_default(app) {
     const pickNumber = typeof pickNote === "number" ? pickNote : 0;
     const adjustedPickNote = (pickNumber % totalNotes + totalNotes) % totalNotes;
     const selectedNote = notesByGroup[adjustedPickNote];
-    if (selectedNote && selectedNote.uuid) {
-      return selectedNote.uuid;
+    if (selectedNote && typeof selectedNote === "object" && selectedNote.uuid) {
+      return String(selectedNote.uuid);
     }
     return null;
     function shuffleArray(array) {
@@ -225,13 +230,6 @@ async function basic_default(app) {
       unique: !!unique
     });
     const pickNote = diceResult.total;
-    if ([1, 2, 3, 4, 6, 7].includes(lookUp)) {
-      const noteCount = await app.filterNotes({});
-      if (!noteCount || noteCount.length === 0) {
-        app.alert("No notes found in your account. Please create some notes first.");
-        return;
-      }
-    }
     const now = /* @__PURE__ */ new Date();
     const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
@@ -239,16 +237,28 @@ async function basic_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await (async () => {
       const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
+      if (existingUUID) return existingUUID;
       const newUUID = await app.createNote(auditNoteName, auditTagName);
       await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
       return newUUID;
     })();
     if ([1, 2, 3, 4, 6, 7].includes(lookUp)) {
+      let preFetchedNotes = null;
+      try {
+        preFetchedNotes = await app.filterNotes({});
+        if (!preFetchedNotes || !Array.isArray(preFetchedNotes) || preFetchedNotes.length === 0) {
+          app.alert("No notes found in your account. Please create some notes first.");
+          const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **No notes found!**; **Options:** ${finalResultx}`;
+          await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+          await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking notes:", error);
+      }
       (async () => {
         try {
-          const uuid = await sortNotesByLookUp(lookUp, pickNote);
+          const uuid = await sortNotesByLookUp(lookUp, pickNote, preFetchedNotes);
           if (uuid && typeof uuid === "string" && uuid.trim() !== "") {
             const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **UUID:** ${uuid}; **Options:** ${finalResultx}`;
             await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
@@ -1334,7 +1344,8 @@ async function table_randomizer_default(app, noteUUID) {
 `;
     const auditReport = `- <mark>Table - Randomizer:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; **UUID:** ${noteUUID} ; <mark>**Data:**</mark> ${finalResultz}`;
     await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
-    await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+    const safeUUID = String(auditnoteUUID);
+    await app.navigate(`https://www.amplenote.com/notes/${safeUUID}`);
     app.alert(finalOutput);
   }
 }

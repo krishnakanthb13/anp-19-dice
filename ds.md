@@ -1,83 +1,106 @@
-I've reviewed your extensive Amplenote plugin code. This is a sophisticated dice rolling and randomization suite with multiple modes. Here are my observations and suggestions:
+The error you're encountering, `TypeError: Cannot read properties of null (reading 'name')`, is occurring because the `app.filterNotes({})` function is returning `null` or an unexpected value instead of an array of notes.
 
-## Overall Assessment
+This happens in the `sortNotesByLookUp` function. The `await app.filterNotes({})` call likely returns an array, but the function is trying to access properties like `name` and `tags` on items that are `null` or don't have those properties.
 
-The code is well-structured and feature-rich, but there are some issues that should be addressed:
+Here's the corrected version of the `sortNotesByLookUp` function with proper error handling and validation:
 
-### 1. **Critical Bug in `askSaiBaba` Function**
 ```javascript
-if (!randomNumber) {
-    if (number2SaiBaba > 1 || number2SaiBaba < 720) {
-```
-The condition should use `>=1 && <=720` (AND, not OR). Currently, any number except those between 1 and 720 would pass, which is the opposite of what's intended.
-
-**Fix:**
-```javascript
-if (!randomNumber) {
-    if (number2SaiBaba >= 1 && number2SaiBaba <= 720) {
-        saibabasAnswer = showAnswer(number2SaiBaba);
-    } else {
-        console.error("Invalid number2SaiBaba: Must be between 1 and 720");
-        app.alert("Invalid number2SaiBaba: Must be between 1 and 720");
-        return; // Add return to prevent further execution
+async function sortNotesByLookUp(lookUp, pickNote) {
+  // Fetch notes with better error handling
+  let notesByGroup;
+  try {
+    notesByGroup = await app.filterNotes({});
+    // Ensure we have an array
+    if (!notesByGroup || !Array.isArray(notesByGroup)) {
+      notesByGroup = [];
     }
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    notesByGroup = [];
+    return null;
+  }
+
+  // Filter out any null or invalid entries
+  notesByGroup = notesByGroup.filter(note => note !== null && note !== undefined);
+
+  // Sorting logic based on lookUp value
+  switch (lookUp) {
+    case 1: // Sort by Name
+      notesByGroup.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      break;
+    case 2: // Sort by Created
+      notesByGroup.sort((a, b) => new Date(a.created || 0) - new Date(b.created || 0));
+      break;
+    case 3: // Sort by Modified
+      notesByGroup.sort((a, b) => new Date(a.updated || 0) - new Date(b.updated || 0));
+      break;
+    case 4: // Random
+      notesByGroup = shuffleArray(notesByGroup);
+      break;
+    case 6: // UUID
+      notesByGroup.sort((a, b) => (a.uuid || '').localeCompare(b.uuid || ''));
+      break;
+    case 7: // Tags + Name
+      notesByGroup.sort((a, b) => {
+        // Compare tags (default to empty string if no tags)
+        const aTag = (a.tags && a.tags.length > 0) ? a.tags[0].toLowerCase() : "";
+        const bTag = (b.tags && b.tags.length > 0) ? b.tags[0].toLowerCase() : "";
+        if (aTag !== bTag) {
+          return aTag.localeCompare(bTag); // Sort by tags
+        }
+        return (a.name || '').localeCompare(b.name || ''); // Sort by name if tags are equal
+      });
+      break;
+    case 5: // Escape / Return
+      return null;
+    default: // Default to Name sort
+      notesByGroup.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  // Adjust pickNote to be within the bounds of notesByGroup
+  const totalNotes = notesByGroup.length;
+  if (totalNotes === 0) {
+    console.log("No valid notes available to pick.");
+    return null;
+  }
+
+  // Ensure pickNote is a number and handle negative values
+  const pickNumber = typeof pickNote === 'number' ? pickNote : 0;
+  const adjustedPickNote = ((pickNumber % totalNotes) + totalNotes) % totalNotes; // Handle negative pickNote properly
+
+  // Select the note based on adjustedPickNote
+  const selectedNote = notesByGroup[adjustedPickNote];
+
+  // Return the UUID of the selected note or null if not found
+  return selectedNote?.uuid || null;
+
+  // Helper function to shuffle an array
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    }
+    return array;
+  }
 }
 ```
 
-### 2. **Duplicate Settings Key**
-In the "Basic" section, you're using `"Previous_Roll"` as the settings key. If multiple sections use this key, they'll overwrite each other. Each section should use its own unique key (which you've done for "Specialized" with `"Previous_Roll_Spc"` and "Fudge/Fate" with `"Previous_Roll_FF"`).
+The main fixes made:
 
-### 3. **Array Destructuring Issue**
-In the "Basic" section initialization, you're destructuring an empty/missing setting without checking if it exists. The default values array at index 3 and 4 are `undefined`:
-```javascript
-const defaults = [1, 6, , , false, 0, false, 0, false, 0, 1, false, 0];
-```
-While this works, it's clearer to use explicit default values:
-```javascript
-const defaults = [1, 6, null, null, false, 0, false, 0, false, 0, 1, false, 0];
-```
+1. **Added try-catch** around `app.filterNotes({})` to handle cases where the API call fails.
 
-### 4. **Memory Leak Risk**
-Each time a dice roll is performed, a new `Date` object and audit note are created. If the user rolls frequently, this could create many audit entries. Consider if this is the intended behavior or if you want to consolidate logs.
+2. **Added null/undefined checks** when accessing properties like `name`, `created`, `updated`, `uuid`, and `tags`.
 
-### 5. **Error Handling**
-The code lacks comprehensive error handling. For example, in the "Table - Randomizer" section, if `noteUUID` doesn't exist, the code will fail silently. Consider adding try-catch blocks for critical operations.
+3. **Added filtering** to remove any null or undefined entries from the notes array.
 
-### 6. **Code Duplication**
-The audit report generation code is repeated across all sections. Consider extracting it into a shared utility function:
-```javascript
-async function createAuditReport(app, type, content) {
-    const now = new Date();
-    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, '');
-    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, '');
-    
-    const auditNoteName = `Dice Results Audit`;
-    const auditTagName = ['-reports/-dice'];
-    
-    const auditnoteUUID = await (async () => {
-        const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-        if (existingUUID) return existingUUID;
-        const newUUID = await app.createNote(auditNoteName, auditTagName);
-        await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-        return newUUID;
-    })();
-    
-    const auditReport = `- <mark>${type}:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; ${content}`;
-    await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
-    await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
-}
-```
+4. **Added proper default values** for all properties (e.g., `(a.name || '')`).
 
-### 7. **Performance Consideration**
-The `magic8Ball` function uses a complex random number generation method that's unnecessary. The standard `Math.random()` is sufficient:
-```javascript
-function magic8Ball() {
-    const answers = [/* ... */];
-    return answers[Math.floor(Math.random() * answers.length)];
-}
-```
+5. **Fixed the pickNote modulo calculation** to handle negative numbers properly.
 
-### 8. **Potential Issue with Explode Logic**
-In the `rollDice` function, the explode logic might create an infinite loop if `reroll` is true and the target is hit repeatedly. Consider adding a maximum number of explosions.
+6. **Added validation** for the `pickNote` parameter to ensure it's a number.
 
-Overall, this is an impressive piece of work with great functionality!
+7. **Improved the return value** to handle cases where no note is found.
+
+8. **Added better logging** for debugging purposes.
+
+This should fix the error you're experiencing. The function will now gracefully handle cases where notes are missing or the API returns unexpected data.

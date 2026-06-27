@@ -1,26 +1,20 @@
 # Release Notes
 
-## [v0.0.8] - Docs & JSDoc Update
-- `64c8640` docs: improve README and add JSDoc comments to dice library
+## [v0.0.10] - Initial Release
+The first official release of the Dice Roller plugin! This release brings a comprehensive suite of dice rolling, randomizing, and oracle tools directly into Amplenote.
 
-## [v0.0.7] - Unit Tests
-- `d8a2152` test(dice): implement unit tests and verification reports
+### Features Included:
+- **Basic Dice Roller**: Roll a configurable number of dice with custom faces, min/max limits, keep/drop highest, exploding dice, sorting, and uniqueness. Includes optional note lookup based on roll results.
+- **Advanced Dice Expressions**: Evaluate complex mathematical dice expressions (e.g., `3d4 + 3d4 - (3d4*1d4) - 2^1d7`).
+- **Specialized Dice**: Simulate Sicherman dice, intransitive dice, and poker dice with optional probability output.
+- **Fudge/Fate Dice**: Roll Fate/Fudge dice (using `+`, ` `, and `-` faces) and total the result.
+- **Fantasy AGE Stunt Rolls**: Single and batch stunt rolling, calculating stunt points and doubles.
+- **Table Randomizer**: Pick random row/column combinations from markdown tables within the current note.
+- **Oracles**: Classic Magic 8-Ball responses and Ask Sai Baba spiritual guidance.
 
-## [v0.0.6] - Documentation & Security
-- `51f5370` docs: add comprehensive documentation and security policy
-
-## [v0.0.5] - Conditional Navigation Feature
-- `8ca0f39` feat(lib): add conditional navigation toggle for looked-up notes
-
-## [v0.0.4] - Optimization & Safety
-- `812cc1a` fix(lib): enhance note navigation safety and optimize API calls
-
-## [v0.0.3] - Navigation & Table Processing Fixes
-- `f9e2ff3` fix(lib): prevent navigation errors and update table processing
-
-## [v0.0.2] - Core Logic Improvements
-- `e793177` fix(lib): improve dice-rolling logic and clean up codebase
-
-## [v0.0.1] - Initial Architecture
-- `704859f` feat(lib): initialize dice rolling plugin architecture
-- `b474aa9` Initial commit (auto-seeded by submodule setup utility)
+### Utilities & Management:
+- **Audit Trail**: Every roll and result is logged to a centralized `Dice Results Audit` note.
+- **Persistent Settings**: Remembers your last used dice configurations and targets.
+- **History Management**: Commands to quickly `View Roll History` (navigates to audit note) or `Clear Audit History` (requires explicit confirmation).
+- **Offline Resilience**: Robust handling of Amplenote's `local-` UUIDs, ensuring the plugin works reliably even before notes have synced to the cloud.
+- **Safety**: Input validation on basic rolls prevents invalid parameters, and history viewing guards against empty notes.

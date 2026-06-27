@@ -1,4 +1,53 @@
 (() => {
+// anp-19-dice/lib/utils.js
+async function getNoteUUID(app, noteName, tagNames) {
+  const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
+  if (existingUUID) {
+    if (existingUUID.startsWith("local-")) {
+      try {
+        let allNotes = await app.filterNotes({});
+        if (allNotes && Array.isArray(allNotes)) {
+          const matchingNotes = allNotes.filter((note) => {
+            const nameMatches = note.name === noteName;
+            const tagMatches = note.tags && note.tags.length > 0 && tagNames.every((tag) => note.tags.includes(tag));
+            return nameMatches && tagMatches;
+          });
+          const onlineNote = matchingNotes.find(
+            (note) => note.uuid && !note.uuid.startsWith("local-")
+          );
+          if (onlineNote && onlineNote.uuid) {
+            await app.setSetting("Dice_Audit_UUID [Do not Edit!]", onlineNote.uuid);
+            return onlineNote.uuid;
+          }
+          if (matchingNotes.length > 0 && matchingNotes[0].uuid) {
+            return matchingNotes[0].uuid;
+          }
+        }
+        try {
+          const localNote = await app.getNote({ uuid: existingUUID });
+          if (localNote) {
+            return existingUUID;
+          }
+        } catch (localError) {
+          console.error("Error fetching local note:", localError);
+        }
+      } catch (error) {
+        console.error("Error resolving UUID:", error);
+      }
+    } else {
+      return existingUUID;
+    }
+  }
+  try {
+    const newUUID = await app.createNote(noteName, tagNames);
+    await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
+    return newUUID;
+  } catch (error) {
+    console.error("Error creating note:", error);
+    throw error;
+  }
+}
+
 // anp-19-dice/lib/basic.js
 async function basic_default(app) {
   const existingSetting = await app.settings["Previous_Roll"];
@@ -244,13 +293,7 @@ async function basic_default(app) {
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID) return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     if ([1, 2, 3, 4, 6, 7].includes(lookUp)) {
       let preFetchedNotes = null;
       try {
@@ -500,14 +543,7 @@ async function advanced_default(app) {
       const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
       const auditNoteName = `Dice Results Audit`;
       const auditTagName = ["-reports/-dice"];
-      const auditnoteUUID = await (async () => {
-        const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-        if (existingUUID)
-          return existingUUID;
-        const newUUID = await app.createNote(auditNoteName, auditTagName);
-        await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-        return newUUID;
-      })();
+      const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
       const finalResultz = `[Report][^ADV]
 [^ADV]: []()${finalResult}
 `;
@@ -852,14 +888,7 @@ ${intransitiveResult.rolls}
   const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
   const auditNoteName = `Dice Results Audit`;
   const auditTagName = ["-reports/-dice"];
-  const auditnoteUUID = await (async () => {
-    const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-    if (existingUUID)
-      return existingUUID;
-    const newUUID = await app.createNote(auditNoteName, auditTagName);
-    await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-    return newUUID;
-  })();
+  const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
   const finalResultz = `[Report][^ADV]
 [^ADV]: []()${finalResult}
 `;
@@ -914,14 +943,7 @@ async function ball_default(app) {
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     (async () => {
       try {
         const auditReport = `- <mark>8 Ball:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; **Question: ${result || "In Memory!"}**; <mark>**Answer:** ${answer}</mark>`;
@@ -974,14 +996,7 @@ async function ask_sai_baba_default(app) {
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     (async () => {
       try {
         const auditReport = `- <mark>Ask Sai Baba:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; **Question: ${question2SaiBaba || "In Memory!"}**; <mark>**Answer:** ${saibabasAnswer}</mark>`;
@@ -1030,14 +1045,7 @@ async function fudge_fate_default(app) {
       const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
       const auditNoteName = `Dice Results Audit`;
       const auditTagName = ["-reports/-dice"];
-      const auditnoteUUID = await (async () => {
-        const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-        if (existingUUID)
-          return existingUUID;
-        const newUUID = await app.createNote(auditNoteName, auditTagName);
-        await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-        return newUUID;
-      })();
+      const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
       (async () => {
         try {
           const auditReport = `- <mark>Fudge/Fate:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; **Options: ${numDice}**; <mark>**Dice rolled:** [${results.join(", ")}]; **Total:** ${total};</mark>`;
@@ -1068,14 +1076,7 @@ async function fantasy_age_stunt_single_roll_default(app) {
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     if (hasStunt) {
       (async () => {
         try {
@@ -1188,14 +1189,7 @@ No stunt this time. Better Luck Next Time!`;
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^AGER]
 [^AGER]: []()${finalResult}
 `;
@@ -1482,14 +1476,7 @@ async function table_randomizer_default(app, noteUUID) {
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
-    const auditnoteUUID = await (async () => {
-      const existingUUID = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
-      if (existingUUID)
-        return existingUUID;
-      const newUUID = await app.createNote(auditNoteName, auditTagName);
-      await app.setSetting("Dice_Audit_UUID [Do not Edit!]", newUUID);
-      return newUUID;
-    })();
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^AGER]
 [^AGER]: []()${finalOutput}
 `;

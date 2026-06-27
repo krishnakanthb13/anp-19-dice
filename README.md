@@ -1,18 +1,28 @@
-# Dice Roller and Randomizer Plugin
+# 🎲 Dice Roller and Randomizer
 
-Run general dice rolls, advanced dice formulas, RPG-specific dice systems, divination-style randomizers, and table-based random selections from inside Amplenote.
+> **A comprehensive plugin for Amplenote to run general dice rolls, advanced mathematical formulas, RPG-specific systems, divination-style randomizers, and table-based selections.**
 
-Suggested icon: `casino`
+---
 
-## Installation
+## ✨ Features
 
-1. Create a new note in Amplenote named `Dice Roller and Randomizer Plugin`.
-2. At the very top of the note, create this metadata table:
+- **Basic & Advanced Rolls**: Standard dice with modifiers (keep, drop, explode, unique) and complex mathematical expressions (`3d4 + 2d6 * 5`).
+- **RPG Systems built-in**: First-class support for *Fudge/Fate* dice and *Fantasy AGE* stunt rolls.
+- **Table Randomizer**: Pick random row/column combinations directly from your Amplenote markdown tables.
+- **Divination & Oracles**: Includes classic *Magic 8-Ball*, *Ask Sai Baba*, and specialized dice (Poker, Sicherman, Intransitive).
+- **Persistent History**: Automatically logs every roll into a centralized `Dice Results Audit` note so you never lose track of your campaign results.
+
+---
+
+## 🛠️ Installation
+
+1. Create a new note in Amplenote and title it **`Dice Roller and Randomizer Plugin`**.
+2. Add the following Settings table to the note:
 
 | Field | Value |
 | :--- | :--- |
 | `name` | Dice Roller and Randomizer |
-| `description` | Roll dice, evaluate dice formulas, randomize note tables, and save results to an audit note. |
+| `description` | Roll dice, evaluate formulas, randomize tables, and save results. |
 | `icon` | casino |
 | `settings` | |
 | `Previous_Roll` | |
@@ -22,87 +32,42 @@ Suggested icon: `casino`
 | `Previous_Roll_Ran` | |
 | `Dice_Audit_UUID [Do not Edit!]` | |
 
-3. Below the table, create a single JavaScript code block:
+*(Note: Leave the setting values blank during first installation. The plugin will manage them automatically.)*
 
-```markdown
-```javascript
-Paste the compiled plugin code here.
-```
-```
+3. Below the table, insert a **JavaScript code block** and paste the compiled plugin code from `build/dice.compiled.js` into it.
+4. Go to **Account Settings > Plugins** in Amplenote and select your newly created plugin note to activate it.
 
-4. Copy the contents of `build/dice.compiled.js` and paste it inside that JavaScript code block.
-5. Go to **Account Settings** -> **Plugins**, then select the plugin note you created.
+---
 
-## Settings Table
+## 🚀 Usage Guide
 
-The plugin stores recent prompt choices and the audit note UUID in Amplenote settings. Leave these blank during first installation unless you are intentionally migrating an existing setup.
+Once activated, the plugin registers several app-level commands and one note-level command:
 
-| Setting | Purpose |
-| :--- | :--- |
-| `Previous_Roll` | Remembers the last Basic dice-roll prompt values. |
-| `Previous_Roll_Spc` | Remembers the last Specialized dice prompt values. |
-| `Previous_Roll_FF` | Remembers the last Fudge/Fate dice count. |
-| `Previous_Roll_AGE` | Remembers the last Fantasy AGE multi-roll player and character counts. |
-| `Previous_Roll_Ran` | Remembers the last Table Randomizer count. |
-| `Dice_Audit_UUID [Do not Edit!]` | Stores the UUID of the generated `Dice Results Audit` note. |
+### 🎲 General Dice
+- **`Basic`**: Rolls standard dice with configurable modifiers (faces, min/max limits, keep/drop, exploding, unique).
+- **`Advanced`**: Evaluates mathematical dice expressions (e.g., `3d4 + 3` or `1d12 + 1d10 + 5`).
 
-## Usage
+### ⚔️ Game Systems
+- **`Fudge/Fate`**: Rolls standard Fate dice (`+`, ` `, `-`) and calculates the total.
+- **`Fantasy AGE Stunt - Single Roll`**: Rolls a stunt check, detecting doubles and stunt points.
+- **`Fantasy AGE Stunt - Roll All At Once`**: Run stunt checks for an entire party in one go.
 
-After activation, the plugin adds app-level commands and one note-level command.
+### 🔮 Oracles & Randomizers
+- **`Specialized`**: Simulates Sicherman, Intransitive, or Poker dice with optional probability outputs.
+- **`8 Ball`**: Answers your yes/no questions with classic Magic 8-Ball responses.
+- **`Ask Sai Baba`**: Pulls one of 720 spiritual guidance responses.
+- **`Table - Randomizer`** *(Note Action)*: Run this from inside a note to detect tables and randomize selections directly from their rows and columns.
 
-| Command | Location | What it does |
-| :--- | :--- | :--- |
-| `Basic` | App option | Rolls a configurable number of dice with custom faces, min/max limits, keep/drop highest, exploding dice, sorting, uniqueness, and optional note lookup. |
-| `Advanced` | App option | Evaluates one or more dice expressions such as `3d4 + 3` or `1d12 + 1d10 + 5`. |
-| `Specialized` | App option | Simulates Sicherman dice, intransitive dice, or poker dice, with optional probability output. |
-| `8 Ball` | App option | Answers a yes/no-style question with a classic Magic 8-Ball response. |
-| `Ask Sai Baba` | App option | Returns one of 720 guidance responses by chosen number or random selection. |
-| `Fudge/Fate` | App option | Rolls Fudge/Fate dice using `+`, blank, and `-` faces and totals the result. |
-| `Fantasy AGE Stunt - Single Roll` | App option | Rolls one Fantasy AGE stunt check and reports doubles and stunt points. |
-| `Fantasy AGE Stunt - Roll All At Once` | App option | Rolls Fantasy AGE stunt checks for multiple players and characters in one run. |
-| `View Roll History` | App option | Navigates directly to the `Dice Results Audit` note. |
-| `Clear Audit History` | App option | Clears the content of the `Dice Results Audit` note after confirmation. |
-| `Table - Randomizer` | Note option | Reads markdown tables from the current note and generates random row/column combinations. |
+### 📜 History & Management
+- **`View Roll History`**: Jump instantly to your `Dice Results Audit` note.
+- **`Clear Audit History`**: Erase your roll history (requires confirmation).
 
-Most commands write a detailed line into the `Dice Results Audit` note. If that note does not exist yet, the plugin creates it and stores the UUID in `Dice_Audit_UUID [Do not Edit!]`.
+---
 
-## Basic Dice Notes
+## 💻 Technical & Development
 
-The `Basic` command supports common tabletop modifiers:
+The source code is modularly structured inside the `lib/` directory and bundled for Amplenote execution using `esbuild`. 
 
-| Option | Meaning |
-| :--- | :--- |
-| Number of Dice | How many dice to roll. |
-| Number of Faces | How many sides each die has. |
-| Minimum / Maximum | Clamp each die result to a lower or upper value. |
-| Keep Highest | Keep only the highest N rolls. |
-| Drop Highest | Drop the highest N rolls. |
-| Explode | Roll an additional die whenever the target value appears. |
-| Sort | Leave rolls unsorted, sort ascending, or sort descending. |
-| Unique | Remove duplicate rolled values. |
-| Look Up in your Notes | Use the roll total as an index into sorted notes and optionally navigate there. |
-
-## Table Randomizer Notes
-
-Run `Table - Randomizer` from a note that contains one or more markdown tables. The command detects tables, asks whether to randomize one table or all tables, and chooses random values column-by-column. It can skip table headers when the selected table has headers.
-
-## Technical Details
-
-The source entry point is `dice.js`, which registers the app and note commands. Individual command implementations live in `lib/`:
-
-| File | Responsibility |
-| :--- | :--- |
-| `lib/basic.js` | Basic dice roller, note lookup sorting, and audit logging. |
-| `lib/advanced.js` | Dice-expression parser and advanced formula runner. |
-| `lib/specialized.js` | Sicherman, intransitive, and poker dice simulations. |
-| `lib/8_ball.js` | Magic 8-Ball prompt and answer selection. |
-| `lib/ask_sai_baba.js` | Sai Baba answer lookup and audit logging. |
-| `lib/fudge_fate.js` | Fudge/Fate dice rolling. |
-| `lib/fantasy_age_stunt_single_roll.js` | Single Fantasy AGE stunt roll. |
-| `lib/fantasy_age_stunt_roll_all_at_once.js` | Batch Fantasy AGE stunt rolls. |
-| `lib/table_randomizer.js` | Markdown table extraction and random combination generation. |
-| `lib/history.js` | Navigation and clearing actions for roll history logs. |
-| `lib/utils.js` | Shared dice, note lookup, and audit helpers. |
-
-
-The distributable artifact is `build/dice.compiled.js`. Rebuild it with the repository's esbuild workflow after changing source files, then paste the compiled artifact into the Amplenote plugin note.
+- **Entry Point:** `dice.js`
+- **Build Process:** Run the repository's build pipeline to compile source files into `build/dice.compiled.js`.
+- For deeper technical context, see [CODE_DOCUMENTATION.md](CODE_DOCUMENTATION.md) and [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md).

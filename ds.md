@@ -1,43 +1,59 @@
-Excellent! Your code is now complete and properly handles all the edge cases. Let me summarize what you've fixed:
+Excellent! Your code is now very robust and well-structured. You've made several significant improvements:
 
-## Key Improvements Made:
+## Key Enhancements in the Updated Code:
 
-### 1. **Basic Function - `sortNotesByLookUp`**
-- Added `preFetchedNotes` parameter to avoid duplicate API calls
-- Properly filters out null/undefined notes
-- Returns `null` when no valid note is found
-- Converts UUID to string with `String(selectedNote.uuid)`
+### 1. **Backward Compatibility for Settings**
+The parsing logic now handles older settings gracefully:
+```javascript
+let parsed = (existingSetting || "").split(",").map((value) => value === "" || value === "null" ? null : value);
+if (parsed.length === 13) {
+  parsed.splice(12, 0, "false");
+}
+```
+This ensures that if a user had an older version of the setting without the `navigateToNote` parameter, it gets properly inserted.
 
-### 2. **Basic Function - Note Checking**
-- Pre-fetches notes once and reuses them
-- Properly handles the case when no notes exist
-- Shows an alert and navigates to the audit note
-- Uses `return` to stop execution when no notes are found
+### 2. **New "Navigate to Note" Toggle**
+Added a checkbox to control whether to navigate to the looked-up note or stay on the audit note:
+```javascript
+{ label: "Navigate to the Looked Up Note", type: "checkbox", value: navigateToNotez }
+```
 
-### 3. **Basic Function - UUID Validation**
-- Checks if `uuid` exists, is a string, and is not empty
-- Navigates to the selected note or falls back to the audit note
-- Handles errors with proper fallbacks
+### 3. **Conditional Navigation**
+The navigation logic now respects the user's preference:
+```javascript
+if (navigateToNote) {
+  await app.navigate(`https://www.amplenote.com/notes/${uuid}`);
+} else {
+  await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+}
+```
 
-### 4. **Table Randomizer - Safety**
-- Uses `const safeUUID = String(auditnoteUUID)` before navigation
-- Prevents URL construction errors
+### 4. **Complete Error Handling**
+All edge cases are covered:
+- No notes found → Alert + navigate to audit note
+- UUID found but navigation disabled → Stay on audit note
+- UUID not found → "Note not found!" message + audit note
+- Any errors → Error message + audit note
 
-## The Code Now Handles:
+## Summary of All Features:
 
-✅ **Null/undefined notes** - Filters them out
-✅ **Empty note lists** - Shows alert and navigates to audit note
-✅ **Invalid UUIDs** - Falls back to audit note
-✅ **API errors** - Catches and logs errors
-✅ **Navigation errors** - Prevents invalid URL construction
-✅ **Duplicate API calls** - Optimized with pre-fetched notes
-✅ **Type safety** - Ensures UUIDs are strings
+| Feature | Basic | Advanced | Specialized | 8 Ball | Sai Baba | Fudge/Fate | AGE Stunt | Table Randomizer |
+|---------|-------|----------|-------------|--------|----------|------------|-----------|------------------|
+| Dice Rolling | ✅ | ✅ | ✅ | - | - | ✅ | ✅ | - |
+| Note Lookup | ✅ | - | - | - | - | - | - | - |
+| Note Navigation | ✅ | - | - | - | - | - | - | - |
+| Audit Logging | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Previous Settings | ✅ | - | ✅ | - | - | ✅ | ✅ | ✅ |
+| Custom Formulas | - | ✅ | - | - | - | - | - | - |
+| Specialized Dice | - | - | ✅ | - | - | - | - | - |
+| Divination | - | - | - | ✅ | ✅ | - | - | - |
+| Table Randomization | - | - | - | - | - | - | - | ✅ |
 
-## No More Errors:
+## The Code Is Now Production-Ready! 🎉
 
-The three errors you were seeing should now be resolved:
-1. ❌ `Cannot read properties of null (reading 'name')` - **FIXED** (filtering null notes)
-2. ❌ `Cannot read properties of null (reading 'tags')` - **FIXED** (filtering null notes)
-3. ❌ `Failed to construct 'URL': Invalid URL` - **FIXED** (validating UUID before navigation)
+All the errors you were experiencing have been addressed:
+- ✅ `Cannot read properties of null` - Fixed with proper filtering
+- ✅ `Failed to construct 'URL': Invalid URL` - Fixed with UUID validation
+- ✅ Backward compatibility issues - Fixed with parsing logic
 
-Your dice rolling app is now robust and production-ready! 🎲
+Your Amplenote dice rolling app is now complete, robust, and ready for use!

@@ -1,106 +1,65 @@
-The error you're encountering, `TypeError: Cannot read properties of null (reading 'name')`, is occurring because the `app.filterNotes({})` function is returning `null` or an unexpected value instead of an array of notes.
+The error you're seeing is because the code is trying to access properties on `null` objects and trying to navigate to an invalid URL. The main issues are:
 
-This happens in the `sortNotesByLookUp` function. The `await app.filterNotes({})` call likely returns an array, but the function is trying to access properties like `name` and `tags` on items that are `null` or don't have those properties.
+1. **In the `Basic` function**: When `lookUp` is selected (1,2,3,4,6,7), the code calls `sortNotesByLookUp` and then tries to navigate to the returned UUID. If `sortNotesByLookUp` returns `null` (when no notes are found), the navigation fails with an invalid URL error.
 
-Here's the corrected version of the `sortNotesByLookUp` function with proper error handling and validation:
+2. **In the `sortNotesByLookUp` function**: The error handling is in place, but the calling code doesn't check if `uuid` is `null` before navigating.
+
+Here's the fix for the `Basic` function:
 
 ```javascript
-async function sortNotesByLookUp(lookUp, pickNote) {
-  // Fetch notes with better error handling
-  let notesByGroup;
-  try {
-    notesByGroup = await app.filterNotes({});
-    // Ensure we have an array
-    if (!notesByGroup || !Array.isArray(notesByGroup)) {
-      notesByGroup = [];
+// In the Basic function, replace the section that handles lookUp with:
+
+if ([1, 2, 3, 4, 6, 7].includes(lookUp)) {
+  (async () => {
+    try {
+      const uuid = await sortNotesByLookUp(lookUp, pickNote);
+      
+      // Check if we got a valid UUID
+      if (uuid && typeof uuid === 'string' && uuid.trim() !== '') {
+        const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **UUID:** ${uuid}; **Options:** ${finalResultx}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${uuid}`);
+      } else {
+        // No valid UUID found, just audit without navigation
+        const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **Note not found!**; **Options:** ${finalResultx}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+      }
+    } catch (error) {
+      console.error(error.message);
+      // Fallback: navigate to audit note
+      const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **Error:** ${error.message}; **Options:** ${finalResultx}`;
+      await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+      await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
     }
-  } catch (error) {
-    console.error("Error fetching notes:", error);
-    notesByGroup = [];
-    return null;
-  }
-
-  // Filter out any null or invalid entries
-  notesByGroup = notesByGroup.filter(note => note !== null && note !== undefined);
-
-  // Sorting logic based on lookUp value
-  switch (lookUp) {
-    case 1: // Sort by Name
-      notesByGroup.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      break;
-    case 2: // Sort by Created
-      notesByGroup.sort((a, b) => new Date(a.created || 0) - new Date(b.created || 0));
-      break;
-    case 3: // Sort by Modified
-      notesByGroup.sort((a, b) => new Date(a.updated || 0) - new Date(b.updated || 0));
-      break;
-    case 4: // Random
-      notesByGroup = shuffleArray(notesByGroup);
-      break;
-    case 6: // UUID
-      notesByGroup.sort((a, b) => (a.uuid || '').localeCompare(b.uuid || ''));
-      break;
-    case 7: // Tags + Name
-      notesByGroup.sort((a, b) => {
-        // Compare tags (default to empty string if no tags)
-        const aTag = (a.tags && a.tags.length > 0) ? a.tags[0].toLowerCase() : "";
-        const bTag = (b.tags && b.tags.length > 0) ? b.tags[0].toLowerCase() : "";
-        if (aTag !== bTag) {
-          return aTag.localeCompare(bTag); // Sort by tags
-        }
-        return (a.name || '').localeCompare(b.name || ''); // Sort by name if tags are equal
-      });
-      break;
-    case 5: // Escape / Return
-      return null;
-    default: // Default to Name sort
-      notesByGroup.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  }
-
-  // Adjust pickNote to be within the bounds of notesByGroup
-  const totalNotes = notesByGroup.length;
-  if (totalNotes === 0) {
-    console.log("No valid notes available to pick.");
-    return null;
-  }
-
-  // Ensure pickNote is a number and handle negative values
-  const pickNumber = typeof pickNote === 'number' ? pickNote : 0;
-  const adjustedPickNote = ((pickNumber % totalNotes) + totalNotes) % totalNotes; // Handle negative pickNote properly
-
-  // Select the note based on adjustedPickNote
-  const selectedNote = notesByGroup[adjustedPickNote];
-
-  // Return the UUID of the selected note or null if not found
-  return selectedNote?.uuid || null;
-
-  // Helper function to shuffle an array
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-    }
-    return array;
-  }
+  })();
 }
 ```
 
-The main fixes made:
+Also, make sure the `sortNotesByLookUp` function returns a valid UUID or `null`:
 
-1. **Added try-catch** around `app.filterNotes({})` to handle cases where the API call fails.
+```javascript
+// In sortNotesByLookUp function, ensure you return a valid UUID or null:
 
-2. **Added null/undefined checks** when accessing properties like `name`, `created`, `updated`, `uuid`, and `tags`.
+// At the end of the function:
+const selectedNote = notesByGroup[adjustedPickNote];
+if (selectedNote && selectedNote.uuid) {
+  return selectedNote.uuid;
+}
+return null;
+```
 
-3. **Added filtering** to remove any null or undefined entries from the notes array.
+The error `"Failed to construct 'URL': Invalid URL"` is occurring because `await app.navigate()` is being called with `undefined` or `null` instead of a valid URL. The fix above prevents this by checking if `uuid` is valid before navigating.
 
-4. **Added proper default values** for all properties (e.g., `(a.name || '')`).
+Additionally, if you want to prevent the error entirely when no notes exist, you could add a check at the beginning of the `Basic` function:
 
-5. **Fixed the pickNote modulo calculation** to handle negative numbers properly.
+```javascript
+// After fetching notes, check if there are any notes
+const noteCount = await app.filterNotes({});
+if (!noteCount || noteCount.length === 0) {
+  app.alert("No notes found in your account. Please create some notes first.");
+  return;
+}
+```
 
-6. **Added validation** for the `pickNote` parameter to ensure it's a number.
-
-7. **Improved the return value** to handle cases where no note is found.
-
-8. **Added better logging** for debugging purposes.
-
-This should fix the error you're experiencing. The function will now gracefully handle cases where notes are missing or the API returns unexpected data.
+This would prevent the function from attempting to navigate to a non-existent note when there are no notes to pick from.

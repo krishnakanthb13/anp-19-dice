@@ -167,7 +167,10 @@ async function basic_default(app) {
     const pickNumber = typeof pickNote === "number" ? pickNote : 0;
     const adjustedPickNote = (pickNumber % totalNotes + totalNotes) % totalNotes;
     const selectedNote = notesByGroup[adjustedPickNote];
-    return selectedNote && selectedNote.uuid ? selectedNote.uuid : null;
+    if (selectedNote && selectedNote.uuid) {
+      return selectedNote.uuid;
+    }
+    return null;
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -222,6 +225,13 @@ async function basic_default(app) {
       unique: !!unique
     });
     const pickNote = diceResult.total;
+    if ([1, 2, 3, 4, 6, 7].includes(lookUp)) {
+      const noteCount = await app.filterNotes({});
+      if (!noteCount || noteCount.length === 0) {
+        app.alert("No notes found in your account. Please create some notes first.");
+        return;
+      }
+    }
     const now = /* @__PURE__ */ new Date();
     const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
@@ -239,11 +249,20 @@ async function basic_default(app) {
       (async () => {
         try {
           const uuid = await sortNotesByLookUp(lookUp, pickNote);
-          const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **UUID:** ${uuid}; **Options:** ${finalResultx}`;
-          await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
-          await app.navigate(`https://www.amplenote.com/notes/${uuid}`);
+          if (uuid && typeof uuid === "string" && uuid.trim() !== "") {
+            const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **UUID:** ${uuid}; **Options:** ${finalResultx}`;
+            await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+            await app.navigate(`https://www.amplenote.com/notes/${uuid}`);
+          } else {
+            const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **Note not found!**; **Options:** ${finalResultx}`;
+            await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+            await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+          }
         } catch (error) {
           console.error(error.message);
+          const auditReport = `- <mark>Basic:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Dice rolled:** ${diceResult.rolls}; **Total:** ${diceResult.total};</mark> **Error:** ${error.message}; **Options:** ${finalResultx}`;
+          await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+          await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         }
       })();
     } else {
@@ -1210,7 +1229,7 @@ async function table_randomizer_default(app, noteUUID) {
         return tables2;
       }
       processTable(tableLines) {
-        const startIndex = this.keepHeaders ? 2 : 3;
+        const startIndex = this.keepHeaders ? 3 : 2;
         const data = tableLines.slice(startIndex).map((line) => {
           return line.split("|").slice(1, -1).map((cell) => cell.trim());
         });

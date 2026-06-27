@@ -1,208 +1,104 @@
-# Amplenote Dice Roller & Randomizer
+# Dice Roller and Randomizer Plugin
 
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Status](https://img.shields.io/badge/Status-Production-green.svg)
-![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)
+Run general dice rolls, advanced dice formulas, RPG-specific dice systems, divination-style randomizers, and table-based random selections from inside Amplenote.
 
-> **Note:** This is the production-ready, security-audited version of the Dice Roller plugin for Amplenote. It has been enhanced with user feedback, additional features, and comprehensive security testing.
+Suggested icon: `casino`
 
----
+## Installation
 
-## 🚀 Overview
+1. Create a new note in Amplenote named `Dice Roller and Randomizer Plugin`.
+2. At the very top of the note, create this metadata table:
 
-This Amplenote plugin provides a comprehensive suite of dice rolling and randomization tools for:
-- 🎉 **General Gaming:** Roll any combination of standard dice with advanced modifiers
-- 🧙 **Tabletop RPGs:** Support for Fudge/Fate and Fantasy AGE systems
-- 🔮 **Divination:** 8-Ball and Sai Baba fortune-telling utilities
-- 🎲 **Specialized Dice:** Sicherman, Intransitive, and Poker Dice implementations
-- 📝 **Data Management:** Random table selection and note-taking capabilities
+| Field | Value |
+| :--- | :--- |
+| `name` | Dice Roller and Randomizer |
+| `description` | Roll dice, evaluate dice formulas, randomize note tables, and save results to an audit note. |
+| `icon` | casino |
+| `settings` | |
+| `Previous_Roll` | |
+| `Previous_Roll_Spc` | |
+| `Previous_Roll_FF` | |
+| `Previous_Roll_AGE` | |
+| `Previous_Roll_Ran` | |
+| `Dice_Audit_UUID [Do not Edit!]` | |
 
-All operations include detailed audit logging and optional navigation to selected notes.
+3. Below the table, create a single JavaScript code block:
 
----
-
-## ✨ Features
-
-### 🎛️ Dice Rolling Features
-- **Standard Dice:** Roll any number of dice with custom faces (d4, d6, d8, d10, d12, d20, d100)
-- **Advanced Modifiers:**
-  - Keep highest/lowest N dice
-  - Drop highest/lowest N dice
-  - Exploding dice with custom explode targets
-  - Min/max value constraints
-  - Unique values (no duplicates)
-- **Custom Formulas:** Parse and evaluate complex expressions with `+`, `-`, `*`, `/`, `^`, and parentheses
-
-### 🎲 Specialized Dice Systems
-- **Sicherman Dice:** Non-standard dice with the same distribution as 2d6
-- **Intransitive Dice:** Acyclic dice that beat each other in cycles (A>B, B>C, C>A)
-- **Poker Dice:** Custom dice for playing poker with card-based results
-
-### 🔮 Divination Tools
-- **Magic 8-Ball:** Classic fortune-telling with 20 predetermined answers
-- **Ask Sai Baba:** Spiritual guidance system with 720 pre-written answers
-
-### 🎭 RPG Support
-- **Fudge/Fate:** Roll Fudge dice with `+`, `-`, and blank results
-- **Fantasy AGE Stunt:** Stunt dice system with automatic doubles detection
-
-### 📝 Table Randomizer
-- **Multi-Table Support:** Randomly select values from any number of tables in a note
-- **Column-Based Selection:** Picks one random value from each column per selection
-- **Header Support:** Automatic skipping of header rows
-- **Multiple Selections:** Generate multiple random combinations at once
-
-### 💾 Audit & Notes
-- **Automatic Audit Logging:** All results are saved to a central audit note
-- **Note Lookup:** Find notes by name, tags, or UUID
-- **Navigation:** Option to navigate to looked-up notes or stay on audit note
-- **Persistent Storage:** All settings and preferences are saved for future use
-
----
-
-## ⚙️ Installation & Setup
-
-### Prerequisites
-- Amplenote account with plugin support
-- Sufficient permissions to create and modify notes
-
-### Installation
-1. Download the plugin ZIP file from the [Releases](link-to-releases) section
-2. In Amplenote, go to **Settings → Plugins**
-3. Click **Upload plugin** and select the ZIP file
-4. Enable the plugin and configure settings if needed
-
-### Initial Configuration
-On first use, the plugin will automatically:
-1. Create the **Dice Results Audit** note for logging
-2. Create the **Dice Settings** note for preferences
-3. Create the **Ask Sai Baba** note with all 720 answers
-4. Create **Intransitive Dice** and **Sicherman Dice** notes
-
----
-
-## 📋 Parameters & Usage
-
-### Common Parameters
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `numDice` | Number | 1 | Number of dice to roll |
-| `faces` | Number | 6 | Number of faces per die |
-| `min` | Number/null | null | Minimum value limit |
-| `max` | Number/null | null | Maximum value limit |
-| `sortOption` | Select | 1 (None) | Sort output: None, Ascending, Descending |
-| `unique` | Boolean | false | Ensure unique values only |
-| `navigateToNote` | Boolean | false | Navigate after roll |
-
-### Dice Rolling Quick Guide
-
-**Roll 3d6:**
+```markdown
 ```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { numDice: 3, faces: 6 } }
-];
+Paste the compiled plugin code here.
+```
 ```
 
-**Roll 4d10 with exploding 10s:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { numDice: 4, faces: 10, explode: true, explodeTarget: 10 } }
-];
-```
+4. Copy the contents of `build/dice.compiled.js` and paste it inside that JavaScript code block.
+5. Go to **Account Settings** -> **Plugins**, then select the plugin note you created.
 
-**Roll 5d20 and keep highest 3:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { numDice: 5, faces: 20, keepHighest: true, keepCount: 3 } }
-];
-```
+## Settings Table
 
-### Advanced Formula Examples
+The plugin stores recent prompt choices and the audit note UUID in Amplenote settings. Leave these blank during first installation unless you are intentionally migrating an existing setup.
 
-**Sum 2d6 then add 5:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { customFormula: "2d6 + 5" } }
-];
-```
+| Setting | Purpose |
+| :--- | :--- |
+| `Previous_Roll` | Remembers the last Basic dice-roll prompt values. |
+| `Previous_Roll_Spc` | Remembers the last Specialized dice prompt values. |
+| `Previous_Roll_FF` | Remembers the last Fudge/Fate dice count. |
+| `Previous_Roll_AGE` | Remembers the last Fantasy AGE multi-roll player and character counts. |
+| `Previous_Roll_Ran` | Remembers the last Table Randomizer count. |
+| `Dice_Audit_UUID [Do not Edit!]` | Stores the UUID of the generated `Dice Results Audit` note. |
 
-**Double the result of 3d4:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { customFormula: "(3d4) * 2" } }
-];
-```
+## Usage
 
-### Table Randomizer Usage
+After activation, the plugin adds app-level commands and one note-level command.
 
-**Randomize from all tables:**
-```javascript
-constdiceRoll = [
-  { command: "table-randomizer", parameters: { "nthTable": "All" } }
-];
-```
+| Command | Location | What it does |
+| :--- | :--- | :--- |
+| `Basic` | App option | Rolls a configurable number of dice with custom faces, min/max limits, keep/drop highest, exploding dice, sorting, uniqueness, and optional note lookup. |
+| `Advanced` | App option | Evaluates one or more dice expressions such as `3d4 + 3` or `1d12 + 1d10 + 5`. |
+| `Specialized` | App option | Simulates Sicherman dice, intransitive dice, or poker dice, with optional probability output. |
+| `8 Ball` | App option | Answers a yes/no-style question with a classic Magic 8-Ball response. |
+| `Ask Sai Baba` | App option | Returns one of 720 guidance responses by chosen number or random selection. |
+| `Fudge/Fate` | App option | Rolls Fudge/Fate dice using `+`, blank, and `-` faces and totals the result. |
+| `Fantasy AGE Stunt - Single Roll` | App option | Rolls one Fantasy AGE stunt check and reports doubles and stunt points. |
+| `Fantasy AGE Stunt - Roll All At Once` | App option | Rolls Fantasy AGE stunt checks for multiple players and characters in one run. |
+| `Table - Randomizer` | Note option | Reads markdown tables from the current note and generates random row/column combinations. |
 
-**Randomize 3 combinations from the 2nd table:**
-```javascript
-constdiceRoll = [
-  { command: "table-randomizer", parameters: { "nthTable": "2", "numberCombo": 3, "hasHeader": true } }
-];
-```
+Most commands write a detailed line into the `Dice Results Audit` note. If that note does not exist yet, the plugin creates it and stores the UUID in `Dice_Audit_UUID [Do not Edit!]`.
 
-### Special Dice Examples
+## Basic Dice Notes
 
-**Sicherman Dice:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { "numDice": 2, "faces": 0 } }  // faces=0 triggers Sicherman
-];
-```
+The `Basic` command supports common tabletop modifiers:
 
-**Poker Dice:**
-```javascript
-constdiceRoll = [
-  { command: "dice-roller", parameters: { "numDice": 5, "faces": 101 } }  // faces=101 triggers Poker
-];
-```
+| Option | Meaning |
+| :--- | :--- |
+| Number of Dice | How many dice to roll. |
+| Number of Faces | How many sides each die has. |
+| Minimum / Maximum | Clamp each die result to a lower or upper value. |
+| Keep Highest | Keep only the highest N rolls. |
+| Drop Highest | Drop the highest N rolls. |
+| Explode | Roll an additional die whenever the target value appears. |
+| Sort | Leave rolls unsorted, sort ascending, or sort descending. |
+| Unique | Remove duplicate rolled values. |
+| Look Up in your Notes | Use the roll total as an index into sorted notes and optionally navigate there. |
 
----
+## Table Randomizer Notes
 
-## 🔐 Security Audit
+Run `Table - Randomizer` from a note that contains one or more markdown tables. The command detects tables, asks whether to randomize one table or all tables, and chooses random values column-by-column. It can skip table headers when the selected table has headers.
 
-This plugin has undergone a comprehensive security audit with the following results:
+## Technical Details
 
-### ✅ Hardcoded Secrets
-- **Status:** Passed
-- **Findings:** No API keys, tokens, or other hardcoded secrets were detected in the source code
+The source entry point is `dice.js`, which registers the app and note commands. Individual command implementations live in `lib/`:
 
-### ✅ Dangerous Patterns
-- **Status:** Passed
-- **Findings:** The code was scanned for unsafe JavaScript patterns (`eval`, `innerHTML`, `document.write`) and none were found. All string interpolation is handled safely.
+| File | Responsibility |
+| :--- | :--- |
+| `lib/basic.js` | Basic dice roller, note lookup sorting, and audit logging. |
+| `lib/advanced.js` | Dice-expression parser and advanced formula runner. |
+| `lib/specialized.js` | Sicherman, intransitive, and poker dice simulations. |
+| `lib/8_ball.js` | Magic 8-Ball prompt and answer selection. |
+| `lib/ask_sai_baba.js` | Sai Baba answer lookup and audit logging. |
+| `lib/fudge_fate.js` | Fudge/Fate dice rolling. |
+| `lib/fantasy_age_stunt_single_roll.js` | Single Fantasy AGE stunt roll. |
+| `lib/fantasy_age_stunt_roll_all_at_once.js` | Batch Fantasy AGE stunt rolls. |
+| `lib/table_randomizer.js` | Markdown table extraction and random combination generation. |
+| `lib/utils.js` | Shared dice, note lookup, and audit helpers. |
 
-### ✅ Input Sanitization
-- **Status:** Passed
-- **Findings:** The plugin acts solely on static dice roll settings and mathematical random number generation. User input is properly sanitized.
-
-### ✅ Dependency Audit
-- **Status:** Production Ready
-- **Findings:** Development dependencies have known vulnerabilities but do not affect the final bundled code that runs in the Amplenote runtime.
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**"Failed to parse dice expression"**
-- Check your formula syntax for typos
-- Ensure parentheses are balanced
-- Make sure dice notation is correct (e.g., `3d6`, not `3d 6`)
-
-**"Note not found"**
-- Verify the note exists in Amplenote
-- Check that the note name is spelled correctly
-- Ensure the audit note hasn't been moved or deleted
-
-**Table randomizer not working**
-- Check your table formatting in the note
-- Ensure
+The distributable artifact is `build/dice.compiled.js`. Rebuild it with the repository's esbuild workflow after changing source files, then paste the compiled artifact into the Amplenote plugin note.

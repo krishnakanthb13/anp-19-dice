@@ -8,6 +8,11 @@ import fantasy_age_stunt_single_roll from './lib/fantasy_age_stunt_single_roll.j
 import fantasy_age_stunt_roll_all_at_once from './lib/fantasy_age_stunt_roll_all_at_once.js';
 import table_randomizer from './lib/table_randomizer.js';
 
+/**
+ * Amplenote Dice Roller and Randomizer plugin manifest.
+ *
+ * Exposes app-level dice/randomizer commands and a note-level table randomizer.
+ */
 export default {
   appOption: {
     "Basic": basic,

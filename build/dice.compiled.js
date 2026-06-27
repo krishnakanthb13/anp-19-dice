@@ -305,15 +305,28 @@ async function basic_default(app) {
 // anp-19-dice/lib/advanced.js
 async function advanced_default(app) {
   class DiceParser {
+    /**
+     * Creates a parser for dice expressions.
+     * @returns {DiceParser} - Parser instance with reset input state.
+     */
     constructor() {
       this.pos = 0;
       this.input = "";
     }
-    // Roll a die with given number of sides
+    /**
+     * Rolls one die with the requested number of sides.
+     * @param {number} sides - Number of sides on the die.
+     * @returns {number} - Random value between 1 and sides.
+     */
     rollDie(sides) {
       return Math.floor(Math.random() * sides) + 1;
     }
-    // Roll multiple dice and sum the results
+    /**
+     * Rolls multiple dice and returns their sum.
+     * @param {number} count - Number of dice to roll.
+     * @param {number} sides - Number of sides on each die.
+     * @returns {number} - Sum of all dice.
+     */
     rollDice(count, sides) {
       let sum = 0;
       for (let i = 0; i < count; i++) {
@@ -321,13 +334,19 @@ async function advanced_default(app) {
       }
       return sum;
     }
-    // Skip whitespace
+    /**
+     * Advances the parser past whitespace characters.
+     * @returns {void}
+     */
     skipWhitespace() {
       while (this.pos < this.input.length && /\s/.test(this.input[this.pos])) {
         this.pos++;
       }
     }
-    // Parse a number or dice expression
+    /**
+     * Parses either a literal number or dice notation such as 2d6.
+     * @returns {number} - Parsed literal or rolled dice total.
+     */
     parseNumber() {
       this.skipWhitespace();
       if (/\d/.test(this.input[this.pos])) {
@@ -350,7 +369,10 @@ async function advanced_default(app) {
       }
       throw new Error("Invalid number or dice expression");
     }
-    // Parse expressions with parentheses
+    /**
+     * Parses a parenthesized expression or a number-like term.
+     * @returns {number} - Parsed expression value.
+     */
     parseParentheses() {
       this.skipWhitespace();
       if (this.input[this.pos] === "(") {
@@ -365,7 +387,10 @@ async function advanced_default(app) {
       }
       return this.parseNumber();
     }
-    // Parse exponents
+    /**
+     * Parses exponent operations.
+     * @returns {number} - Parsed exponent expression value.
+     */
     parseExponent() {
       let left = this.parseParentheses();
       this.skipWhitespace();
@@ -377,7 +402,10 @@ async function advanced_default(app) {
       }
       return left;
     }
-    // Parse multiplication and division
+    /**
+     * Parses multiplication and division operations.
+     * @returns {number} - Parsed multiplication/division expression value.
+     */
     parseMultiplyDivide() {
       let left = this.parseExponent();
       this.skipWhitespace();
@@ -394,7 +422,10 @@ async function advanced_default(app) {
       }
       return left;
     }
-    // Parse addition and subtraction
+    /**
+     * Parses addition and subtraction operations.
+     * @returns {number} - Parsed expression value.
+     */
     parseExpression() {
       let left = this.parseMultiplyDivide();
       this.skipWhitespace();
@@ -411,7 +442,11 @@ async function advanced_default(app) {
       }
       return left;
     }
-    // Main parse function
+    /**
+     * Parses a complete dice expression.
+     * @param {string} input - Dice expression to parse.
+     * @returns {number} - Evaluated expression value.
+     */
     parse(input) {
       this.input = input.replace(/\s+/g, "").toLowerCase();
       this.pos = 0;
@@ -531,14 +566,27 @@ async function specialized_default(app) {
     }
   };
   class DiceSimulator {
+    /**
+     * Creates a simulator for specialized dice configurations.
+     * @param {Object|null} customDice - Optional dice configuration override.
+     * @returns {DiceSimulator} - Simulator instance.
+     */
     constructor(customDice = null) {
       this.results = [];
       this.diceConfig = customDice || DICE_VARIATIONS;
     }
+    /**
+     * Rolls one value from the provided face list.
+     * @param {Array<number|string>} faces - Available faces for the die.
+     * @returns {number|string} - Selected die face.
+     */
     rollDie(faces) {
       return faces[Math.floor(Math.random() * faces.length)];
     }
-    // Calculate probability of sum for Sicherman dice
+    /**
+     * Calculates theoretical sum probabilities for the configured Sicherman dice.
+     * @returns {Array<{sum: number, probability: string}>} - Sum probability rows.
+     */
     calculateSichermanProbabilities() {
       const probabilities = /* @__PURE__ */ new Map();
       const die1 = this.diceConfig.sicherman.die1;
@@ -555,7 +603,10 @@ async function specialized_default(app) {
         probability: (count / totalOutcomes * 100).toFixed(2) + "%"
       })).sort((a, b) => a.sum - b.sum);
     }
-    // Calculate winning probabilities for intransitive dice
+    /**
+     * Calculates pairwise win probabilities for the intransitive dice set.
+     * @returns {Object<string, string>} - Win probabilities by dice matchup.
+     */
     calculateIntransitiveProbabilities() {
       const dieA = this.diceConfig.intransitive.dieA;
       const dieB = this.diceConfig.intransitive.dieB;
@@ -577,7 +628,11 @@ async function specialized_default(app) {
         "C vs A": calculateWinProbability(dieC, dieA)
       };
     }
-    // Enhanced poker hand analysis
+    /**
+     * Classifies a poker dice hand.
+     * @param {Array<number|string>} hand - Rolled poker dice faces.
+     * @returns {string} - Poker hand label.
+     */
     analyzePokerHand(hand) {
       const valueMap = { "A": 14, "K": 13, "Q": 12, "J": 11 };
       const numericHand = hand.map(
@@ -604,6 +659,11 @@ async function specialized_default(app) {
       if (isStrait) return "Straight";
       return "High card";
     }
+    /**
+     * Simulates Sicherman dice rolls.
+     * @param {number} rolls - Number of two-dice rolls to simulate.
+     * @returns {{rolls: string, probabilities: Array<{sum: number, probability: string}>}} - Formatted rolls and probability rows.
+     */
     simulateSicherman(rolls = 1) {
       this.results = [];
       const probabilities = this.calculateSichermanProbabilities();
@@ -621,6 +681,11 @@ async function specialized_default(app) {
         probabilities
       };
     }
+    /**
+     * Simulates intransitive dice rolls.
+     * @param {number} rolls - Number of three-dice rolls to simulate.
+     * @returns {{rolls: string, probabilities: Object<string, string>}} - Formatted rolls and matchup probabilities.
+     */
     simulateIntransitive(rolls = 1) {
       this.results = [];
       const probabilities = this.calculateIntransitiveProbabilities();
@@ -635,6 +700,12 @@ async function specialized_default(app) {
         probabilities
       };
     }
+    /**
+     * Simulates a poker dice hand.
+     * @param {number} rolls - Number of dice to roll.
+     * @param {string} diceVariation - Poker dice variation key.
+     * @returns {{hand: string, analysis: string, probabilities: Object<string, string>}} - Formatted hand, analysis, and probabilities.
+     */
     simulatePoker(rolls = 5, diceVariation = "standard") {
       this.results = [];
       for (let i = 0; i < rolls; i++) {
@@ -648,6 +719,11 @@ async function specialized_default(app) {
         probabilities: this.calculatePokerProbabilities(diceVariation)
       };
     }
+    /**
+     * Returns theoretical poker dice hand probabilities.
+     * @param {string} diceVariation - Poker dice variation key.
+     * @returns {Object<string, string>} - Probability labels by hand type.
+     */
     calculatePokerProbabilities(diceVariation) {
       const probabilities = {
         "Five of a kind": "0.08%",
@@ -661,20 +737,37 @@ async function specialized_default(app) {
       };
       return probabilities;
     }
+    /**
+     * Formats the most recent Sicherman simulation.
+     * @returns {string} - Multiline Sicherman roll report.
+     */
     formatSichermanResults() {
       return this.results.map(
         (roll, index) => `Roll ${index + 1}: Die 1 = ${roll.die1}, Die 2 = ${roll.die2}, Sum = ${roll.sum}`
       ).join("\n");
     }
+    /**
+     * Formats the most recent intransitive dice simulation.
+     * @returns {string} - Multiline intransitive roll report.
+     */
     formatIntransitiveResults() {
       return this.results.map(
         (roll, index) => `Roll ${index + 1}: Die A = ${roll.dieA}, Die B = ${roll.dieB}, Die C = ${roll.dieC}`
       ).join("\n");
     }
+    /**
+     * Formats the most recent poker dice hand.
+     * @returns {string} - Poker hand report.
+     */
     formatPokerResults() {
       return `Poker Dice Hand: ${this.results.join(" ")}`;
     }
-    // Method to add custom dice configuration
+    /**
+     * Adds a custom dice configuration to the simulator.
+     * @param {string} name - Custom dice configuration name.
+     * @param {Array<number|string>} faces - Faces available for the custom die.
+     * @returns {void}
+     */
     addCustomDiceConfiguration(name, faces) {
       if (!this.diceConfig.custom) {
         this.diceConfig.custom = {};
@@ -1226,10 +1319,21 @@ async function table_randomizer_default(app, noteUUID) {
     ] = result;
     await app.setSetting("Previous_Roll_Ran", numberCombo);
     class ColumnRandomPicker {
+      /**
+       * Creates a random picker for markdown tables.
+       * @param {string} markdownText - Processed markdown containing named tables.
+       * @param {boolean} keepHeaders - Whether source tables include headers.
+       * @returns {ColumnRandomPicker} - Picker instance with parsed tables.
+       */
       constructor(markdownText2, keepHeaders = true) {
         this.keepHeaders = keepHeaders;
         this.tables = this.parseTables(markdownText2);
       }
+      /**
+       * Parses numbered markdown tables into a table map.
+       * @param {string} markdownText - Markdown containing generated table headings.
+       * @returns {Object<string, string[][]>} - Table data keyed by table name.
+       */
       parseTables(markdownText2) {
         const tables2 = {};
         let currentTable2 = [];
@@ -1251,6 +1355,11 @@ async function table_randomizer_default(app, noteUUID) {
         }
         return tables2;
       }
+      /**
+       * Converts table lines into cell arrays, skipping markdown separator/header rows.
+       * @param {string[]} tableLines - Raw markdown table lines.
+       * @returns {string[][]} - Parsed table body cells.
+       */
       processTable(tableLines) {
         const startIndex = this.keepHeaders ? 3 : 2;
         const data = tableLines.slice(startIndex).map((line) => {
@@ -1258,11 +1367,21 @@ async function table_randomizer_default(app, noteUUID) {
         });
         return data;
       }
+      /**
+       * Picks one non-empty value from an array.
+       * @param {string[]} arr - Candidate values.
+       * @returns {string} - Random value, or an empty string when none are available.
+       */
       getRandomValueFromArray(arr) {
         const validValues = arr.filter((value) => value !== "");
         if (validValues.length === 0) return "";
         return validValues[Math.floor(Math.random() * validValues.length)];
       }
+      /**
+       * Picks one random value from each column of a table.
+       * @param {string} tableName - Name of the parsed table.
+       * @returns {string[]|null} - Column-based random combination, or null if missing.
+       */
       getColumnBasedRandomCombination(tableName) {
         const table = this.tables[tableName];
         if (!table) return null;
@@ -1277,6 +1396,12 @@ async function table_randomizer_default(app, noteUUID) {
         });
         return columns.map((column) => this.getRandomValueFromArray(column));
       }
+      /**
+       * Generates multiple random combinations for one table.
+       * @param {string} tableName - Name of the parsed table.
+       * @param {number} count - Number of combinations to generate.
+       * @returns {string[][]} - Generated combinations.
+       */
       generateMultipleCombinations(tableName, count) {
         const combinations = [];
         for (let i = 0; i < count; i++) {
@@ -1285,7 +1410,11 @@ async function table_randomizer_default(app, noteUUID) {
         }
         return combinations;
       }
-      // Generate combinations for all tables
+      /**
+       * Generates random combinations for every parsed table.
+       * @param {number} count - Number of combinations per table.
+       * @returns {Object<string, string[][]>} - Generated combinations keyed by table name.
+       */
       generateCombinationsForAllTables(count = 1) {
         const result2 = {};
         for (const tableName of Object.keys(this.tables)) {
@@ -1293,7 +1422,12 @@ async function table_randomizer_default(app, noteUUID) {
         }
         return result2;
       }
-      // Generate combinations for a specific table (one table only)
+      /**
+       * Generates random combinations for a single parsed table.
+       * @param {string} tableName - Name of the parsed table.
+       * @param {number} count - Number of combinations to generate.
+       * @returns {Object<string, string[][]>} - Generated combinations keyed by table name.
+       */
       generateCombinationsForOneTable(tableName, count = 1) {
         const result2 = {};
         if (this.tables[tableName]) {
@@ -1303,7 +1437,11 @@ async function table_randomizer_default(app, noteUUID) {
         }
         return result2;
       }
-      // Format combinations as markdown for one or more tables
+      /**
+       * Formats generated combinations as markdown tables.
+       * @param {Object<string, string[][]>|string[][]} combinations - Generated random combinations.
+       * @returns {string} - Markdown report.
+       */
       formatAsMarkdown(combinations) {
         let output = "";
         if (Array.isArray(combinations)) {

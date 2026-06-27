@@ -60,6 +60,8 @@ After activation, the plugin adds app-level commands and one note-level command.
 | `Fudge/Fate` | App option | Rolls Fudge/Fate dice using `+`, blank, and `-` faces and totals the result. |
 | `Fantasy AGE Stunt - Single Roll` | App option | Rolls one Fantasy AGE stunt check and reports doubles and stunt points. |
 | `Fantasy AGE Stunt - Roll All At Once` | App option | Rolls Fantasy AGE stunt checks for multiple players and characters in one run. |
+| `View Roll History` | App option | Navigates directly to the `Dice Results Audit` note. |
+| `Clear Audit History` | App option | Clears the content of the `Dice Results Audit` note after confirmation. |
 | `Table - Randomizer` | Note option | Reads markdown tables from the current note and generates random row/column combinations. |
 
 Most commands write a detailed line into the `Dice Results Audit` note. If that note does not exist yet, the plugin creates it and stores the UUID in `Dice_Audit_UUID [Do not Edit!]`.
@@ -99,6 +101,8 @@ The source entry point is `dice.js`, which registers the app and note commands. 
 | `lib/fantasy_age_stunt_single_roll.js` | Single Fantasy AGE stunt roll. |
 | `lib/fantasy_age_stunt_roll_all_at_once.js` | Batch Fantasy AGE stunt rolls. |
 | `lib/table_randomizer.js` | Markdown table extraction and random combination generation. |
+| `lib/history.js` | Navigation and clearing actions for roll history logs. |
 | `lib/utils.js` | Shared dice, note lookup, and audit helpers. |
+
 
 The distributable artifact is `build/dice.compiled.js`. Rebuild it with the repository's esbuild workflow after changing source files, then paste the compiled artifact into the Amplenote plugin note.

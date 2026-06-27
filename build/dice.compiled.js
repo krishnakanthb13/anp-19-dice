@@ -93,7 +93,7 @@ async function basic_default(app) {
         { label: "Drop Highest Roll Count", type: "string", value: dropCountz },
         { label: "Explode (An additional Die)", type: "checkbox", value: explodez },
         { label: "Explode Target", type: "string", value: explodeTargetz },
-        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Decending", value: 3 }], value: sortOptionz || 1 },
+        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: sortOptionz || 1 },
         { label: "Unique (Every Die is Unique)", type: "checkbox", value: uniquez },
         { label: "Navigate to the Looked Up Note", type: "checkbox", value: navigateToNotez },
         { label: "Look Up in your Notes (Sorted By)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: lookUpz || 5 }
@@ -112,7 +112,7 @@ async function basic_default(app) {
         { label: "Drop Highest Roll Count", type: "string" },
         { label: "Explode", type: "checkbox" },
         { label: "Explode Target", type: "string" },
-        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Decending", value: 3 }], value: 1 },
+        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: 1 },
         { label: "Unique", type: "checkbox" },
         { label: "Navigate to the Looked Up Note", type: "checkbox", value: false },
         { label: "Look Up in your Notes (Sorted By)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: 5 }
@@ -257,6 +257,12 @@ async function basic_default(app) {
       navigateToNote,
       lookUp
     ] = result;
+    const numDiceNum = Number(numDice);
+    const facesNum = Number(faces);
+    if (numDiceNum < 1 || facesNum < 1) {
+      app.alert("Number of dice and faces must be at least 1");
+      return;
+    }
     const resultx = `**NumDice**: ${numDice},
 **Faces**: ${faces},
 **Min**: ${min},
@@ -1488,6 +1494,39 @@ async function table_randomizer_default(app, noteUUID) {
   }
 }
 
+// anp-19-dice/lib/history.js
+async function clearAuditHistory(app) {
+  const confirm = await app.prompt("Clear all dice audit history?", {
+    inputs: [{ label: "Type 'YES' to confirm", type: "string" }]
+  });
+  if (confirm && confirm[0] === "YES") {
+    const uuid = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
+    if (uuid) {
+      await app.setNoteContent({ uuid }, "");
+      app.alert("Audit history cleared!");
+    } else {
+      app.alert("No audit note found to clear.");
+    }
+  }
+}
+async function viewRollHistory(app) {
+  const uuid = await app.settings["Dice_Audit_UUID [Do not Edit!]"];
+  if (uuid) {
+    try {
+      const content = await app.getNoteContent({ uuid });
+      if (!content || content.trim() === "") {
+        app.alert("Audit history is empty. Roll some dice first!");
+        return;
+      }
+      await app.navigate(`https://www.amplenote.com/notes/${uuid}`);
+    } catch (error) {
+      app.alert("Could not access audit note.");
+    }
+  } else {
+    app.alert("No audit note found. Roll some dice first!");
+  }
+}
+
 // anp-19-dice/dice.js
 var dice_default = {
   appOption: {
@@ -1498,7 +1537,9 @@ var dice_default = {
     "Ask Sai Baba": ask_sai_baba_default,
     "Fudge/Fate": fudge_fate_default,
     "Fantasy AGE Stunt - Single Roll": fantasy_age_stunt_single_roll_default,
-    "Fantasy AGE Stunt - Roll All At Once": fantasy_age_stunt_roll_all_at_once_default
+    "Fantasy AGE Stunt - Roll All At Once": fantasy_age_stunt_roll_all_at_once_default,
+    "View Roll History": viewRollHistory,
+    "Clear Audit History": clearAuditHistory
   },
   noteOption: {
     "Table - Randomizer": table_randomizer_default

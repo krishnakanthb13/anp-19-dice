@@ -1719,7 +1719,7 @@ async function weighted_random_default(app) {
     finalResult += `**Probabilities:**
 `;
     probabilities.forEach((p) => {
-      finalResult += `- ${p.item}: ${p.probability}% (weight: ${p.weight})
+      finalResult += `.- ${p.item}: ${p.probability}% (weight: ${p.weight})
 `;
     });
     const now = /* @__PURE__ */ new Date();
@@ -1917,7 +1917,7 @@ async function decision_matrix_default(app) {
     finalResult += `<mark>**Rankings:**</mark>
 `;
     weightedScores.forEach((item, i) => {
-      const medal = i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `${i + 1}.`;
+      const medal = i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `.${i + 1}.`;
       finalResult += `${medal} **${item.option}** - Score: ${item.total}
 `;
     });
@@ -2007,14 +2007,13 @@ async function name_generator_default(app) {
     const count = Math.min(parseInt(countStr) || 5, 20);
     const titles = ["Sir", "Lady", "Lord", "Captain", "Commander", "Archmage", "King", "Queen", "Prince", "Princess", "Master", "Doctor", "Professor", "Admiral", "Baron"];
     let finalResult = `<mark>**Generated Names (${style})**</mark>
-`;
+Names: `;
     const names = [];
     for (let i = 0; i < count; i++) {
       const name = generateName(style);
       names.push(name);
-      finalResult += `${i + 1}. ${name}
-`;
     }
+    finalResult += names.join(", ");
     const now = /* @__PURE__ */ new Date();
     const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");

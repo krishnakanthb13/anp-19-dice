@@ -11,7 +11,32 @@
 - **Text:** Bold, readable text like **"MASTER AMPLENOTE DICE"** or **"AMPLENOTE PRO TIP."**
 
 ### Description
-- **Summary:** "A straightforward, fact-based walkthrough of the Dice plugin for Amplenote. We cover all the features it provides, from simple dice rolls to advanced decision matrices and oracles, and show you how to use them effectively."
+- **Summary:** A complete, no-fluff walkthrough of every feature in the Amplenote Dice plugin — from basic polyhedral rolls to advanced oracles, RPG systems, and decision tools.
+- **Detailed Options:**
+    The Dice plugin turns Amplenote into a powerful randomization hub. This video covers every option and sub-option across four categories:
+    
+    **General Dice**
+    - **Basic:** Polyhedral dice with custom counts, faces, min/max limits, keep/drop, exploding, and unique results.
+    - **Advanced:** Complex math expressions like `3d4 + 2d6 * 5`.
+    - **Quick Roll Presets:** One-click D20, 2d6, 3d6, and D&D Ability Scores.
+    - **Percentile (D100):** Two-digit rolls with optional Flip-to-Succeed.
+    
+    **Game Systems**
+    - **Fudge/Fate:** Fate dice with net modifier calculation.
+    - **Fantasy AGE Stunt (Single & Party):** 3d6 checks with automatic stunt-point detection.
+    - **Dice Pool (Shadowrun/WoD):** d6 pool against a success threshold, with exploding and hit/miss counting.
+    
+    **Oracles & Divination**
+    - **Specialized:** Sicherman, Intransitive, and Poker dice with probability outputs.
+    - **8 Ball:** Classic yes/no answers.
+    - **Ask Sai Baba:** 720 wisdom responses.
+    - **Tarot Cards:** Single Card, 3-Card Spread, and Celtic Cross with reversed meanings.
+    
+    **Generators & Tools**
+    - **Weighted Random:** Probability-weighted item selection.
+    - **Decision Matrix:** Score options against weighted criteria.
+    - **Name Generator:** Themed names (Fantasy, Sci-Fi, Norse) with titles.
+    - **Table - Randomizer:** Pick random cells from note-based Markdown tables.
 - **Timestamps:** 
     - 0:00 Intro & Setup
     - 0:45 General Dice (Basic, Advanced, Presets, Percentile)

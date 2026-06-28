@@ -1628,7 +1628,7 @@ async function quick_presets_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^PRESET]
-[^PRESET]: []()${finalResult}
+[^PRESET]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -1715,7 +1715,6 @@ async function weighted_random_default(app) {
     let finalResult = `<mark>**Weighted Random Selection**</mark>
 `;
     finalResult += `**Selected:** ${selected}
-
 `;
     finalResult += `**Probabilities:**
 `;
@@ -1730,7 +1729,7 @@ async function weighted_random_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^WEIGHTED]
-[^WEIGHTED]: []()${finalResult}
+[^WEIGHTED]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -1825,7 +1824,6 @@ async function dice_pool_default(app) {
     finalResult += `**Ones (1s):** ${result2.ones}
 `;
     finalResult += `**Net Successes:** ${result2.successes - result2.ones}
-
 `;
     finalResult += `**Roll Details:**
 `;
@@ -1842,7 +1840,7 @@ async function dice_pool_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^POOL]
-[^POOL]: []()${finalResult}
+[^POOL]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -1907,7 +1905,6 @@ async function decision_matrix_default(app) {
     });
     weightedScores.sort((a, b) => b.total - a.total);
     let finalResult = `<mark>**Decision Matrix Results**</mark>
-
 `;
     finalResult += `| Option | ${criteria.join(" | ")} | **Total** |
 `;
@@ -1917,16 +1914,14 @@ async function decision_matrix_default(app) {
       finalResult += `| ${item.option} | ${item.scores.join(" | ")} | **${item.total}** |
 `;
     });
-    finalResult += `
-<mark>**Rankings:**</mark>
+    finalResult += `<mark>**Rankings:**</mark>
 `;
     weightedScores.forEach((item, i) => {
       const medal = i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `${i + 1}.`;
       finalResult += `${medal} **${item.option}** - Score: ${item.total}
 `;
     });
-    finalResult += `
-**Criteria Weights:** ${criteria.map((c, i) => `${c}: ${weights[i]}`).join(", ")}`;
+    finalResult += `**Criteria Weights:** ${criteria.map((c, i) => `${c}: ${weights[i]}`).join(", ")}`;
     const now = /* @__PURE__ */ new Date();
     const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
@@ -1934,7 +1929,7 @@ async function decision_matrix_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^DECISION]
-[^DECISION]: []()${finalResult}
+[^DECISION]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -2012,7 +2007,6 @@ async function name_generator_default(app) {
     const count = Math.min(parseInt(countStr) || 5, 20);
     const titles = ["Sir", "Lady", "Lord", "Captain", "Commander", "Archmage", "King", "Queen", "Prince", "Princess", "Master", "Doctor", "Professor", "Admiral", "Baron"];
     let finalResult = `<mark>**Generated Names (${style})**</mark>
-
 `;
     const names = [];
     for (let i = 0; i < count; i++) {
@@ -2028,7 +2022,7 @@ async function name_generator_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^NAMEGEN]
-[^NAMEGEN]: []()${finalResult}
+[^NAMEGEN]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -2121,7 +2115,6 @@ async function tarot_default(app) {
     let finalResult = `<mark>**Tarot Reading**</mark>
 `;
     if (question) finalResult += `**Question:** ${question}
-
 `;
     if (spreadType === "single") {
       const card = cards[0];
@@ -2132,13 +2125,11 @@ async function tarot_default(app) {
     } else if (spreadType === "three") {
       const positions = ["Past", "Present", "Future"];
       finalResult += `**Three Card Spread**
-
 `;
       cards.forEach((card, i) => {
         finalResult += `**${positions[i]}:** ${card.name} ${card.reversed ? "(Reversed)" : ""}
 `;
         finalResult += `*${card.fullMeaning}*
-
 `;
       });
     } else {
@@ -2155,13 +2146,11 @@ async function tarot_default(app) {
         "Final Outcome"
       ];
       finalResult += `**Celtic Cross Spread**
-
 `;
       cards.forEach((card, i) => {
         finalResult += `**${positions[i]}:** ${card.name} ${card.reversed ? "(Reversed)" : ""}
 `;
         finalResult += `*${card.fullMeaning}*
-
 `;
       });
     }
@@ -2172,7 +2161,7 @@ async function tarot_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^TAROT]
-[^TAROT]: []()${finalResult}
+[^TAROT]: []()${finalResult.trim()}
 `;
     (async () => {
       try {
@@ -2241,7 +2230,6 @@ async function percentile_default(app) {
       finalResult += `**Roll:** ${roll.roll} (Target: <=${target})
 `;
       finalResult += `**Flipped Roll:** ${roll.flipped}
-
 `;
       if (normalSuccess && flipSuccess) {
         finalResult += `**Result:** Critical Success! (Both rolls succeed)`;
@@ -2270,8 +2258,7 @@ async function percentile_default(app) {
         }
       }
     }
-    finalResult += `
-**Roll Type:** ${rollType}`;
+    finalResult += `**Roll Type:** ${rollType}`;
     const now = /* @__PURE__ */ new Date();
     const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
     const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
@@ -2279,7 +2266,7 @@ async function percentile_default(app) {
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
     const finalResultz = `[Report][^PERCENTILE]
-[^PERCENTILE]: []()${finalResult}
+[^PERCENTILE]: []()${finalResult.trim()}
 `;
     (async () => {
       try {

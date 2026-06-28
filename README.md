@@ -7,9 +7,10 @@
 ## ✨ Features
 
 - **Basic & Advanced Rolls**: Standard dice with modifiers (keep, drop, explode, unique) and complex mathematical expressions (`3d4 + 2d6 * 5`).
-- **RPG Systems built-in**: First-class support for *Fudge/Fate* dice and *Fantasy AGE* stunt rolls.
+- **RPG Systems built-in**: First-class support for *Fudge/Fate* dice, *Fantasy AGE* stunt rolls, and *Shadowrun/WoD* Dice Pools.
 - **Table Randomizer**: Pick random row/column combinations directly from your Amplenote markdown tables.
-- **Divination & Oracles**: Includes classic *Magic 8-Ball*, *Ask Sai Baba*, and specialized dice (Poker, Sicherman, Intransitive).
+- **Divination & Oracles**: Includes classic *Magic 8-Ball*, *Ask Sai Baba*, *Tarot Cards*, and specialized dice (Poker, Sicherman, Intransitive).
+- **Generators & Tools**: Use the *Name Generator*, *Weighted Random*, and *Decision Matrix* to spark creativity or make unbiased choices.
 - **Persistent History**: Automatically logs every roll into a centralized `Dice Results Audit` note so you never lose track of your campaign results.
 
 ---
@@ -21,19 +22,18 @@
 
 | Field | Value |
 | :--- | :--- |
-|name|Dice - Testing|
-|icon|casino|
-|description<!-- {"cell":{"colwidth":108}} -->|Simple, Advanced, Specialized Dice Randomizer.<br />Open Random Notes to review or revisit based on different Note Properties (In Basic Option).<br />Randomize any Table in Amplenote.<br />Have some of your favorite games rolled here at Amplenote.|
-|instructions<!-- {"cell":{"colwidth":108}} -->|- Run the Dice: Basicfrom App Options by ctrl / cmd + o.<br />- At first, it give you blank boxes to fill up. (Next time it remember your previous inputs).<br />- You can play around with the options listed to get an extensive range of a result.<br />- Using, Look Up in your Notes option, you can select any available dropdowns for the Plugin to take you to the random note.<br />- Audit page has all the Dice rolls and other details depending on your selection.<br />Note: More options are on its way. Comment in the Installation page for any feedback or suggestion.<br />- New features added (All features) - December 29th, 2024<br />     - (note-Option) Table - Randomizer.<br />     - (app-Option) Basic, Advanced, Specialized, 8 Ball, Ask Sai Baba, Fudge/Fate, Fantasy AGE Stunt - (Single Roll, Roll All At Once)..|
-|setting|Previous_Roll|
-|setting|Previous_Roll_ADV1 (Not in use)|
-|setting|Previous_Roll_ADV2 (Not in use)|
-|setting|Previous_Roll_Spc|
-|setting|Previous_Roll_FF|
-|setting|Previous_Roll_AGE|
-|setting|Previous_Roll_Ran|
-|setting|Dice_Audit_UUID \[Do not Edit!\]|
-
+| `name` | Dice Roller and Randomizer |
+| `icon` | casino |
+| `description` | Comprehensive dice rolling, game systems, and random generators for Amplenote. |
+| `settings` | |
+| `Previous_Roll` | |
+| `Previous_Roll_Spc` | |
+| `Previous_Roll_FF` | |
+| `Previous_Roll_AGE` | |
+| `Previous_Roll_Ran` | |
+| `Previous_Weighted` | |
+| `Previous_DicePool` | |
+| `Dice_Audit_UUID [Do not Edit!]` | |
 
 *(Note: Leave the setting values blank during first installation. The plugin will manage them automatically.)*
 
@@ -49,17 +49,26 @@ Once activated, the plugin registers several app-level commands and one note-lev
 ### 🎲 General Dice
 - **`Basic`**: Rolls standard dice with configurable modifiers (faces, min/max limits, keep/drop, exploding, unique).
 - **`Advanced`**: Evaluates mathematical dice expressions (e.g., `3d4 + 3` or `1d12 + 1d10 + 5`).
+- **`Quick Roll Presets`**: Easily pick standard RPG rolls (e.g. D20, 2d6, D&D Ability Score) and add modifiers.
+- **`Percentile (D100)`**: Roll 00-99 or 1-100, and even supports "flip to succeed" mechanics.
 
 ### ⚔️ Game Systems
 - **`Fudge/Fate`**: Rolls standard Fate dice (`+`, ` `, `-`) and calculates the total.
 - **`Fantasy AGE Stunt - Single Roll`**: Rolls a stunt check, detecting doubles and stunt points.
 - **`Fantasy AGE Stunt - Roll All At Once`**: Run stunt checks for an entire party in one go.
+- **`Dice Pool (Shadowrun/WoD)`**: Roll a pool of d6s against a Target Number, counting hits and handling exploding 6s.
 
-### 🔮 Oracles & Randomizers
+### 🔮 Oracles & Divination
 - **`Specialized`**: Simulates Sicherman, Intransitive, or Poker dice with optional probability outputs.
 - **`8 Ball`**: Answers your yes/no questions with classic Magic 8-Ball responses.
 - **`Ask Sai Baba`**: Pulls one of 720 spiritual guidance responses.
-- **`Table - Randomizer`** *(Note Action)*: Run this from inside a note to detect tables and randomize selections directly from their rows and columns.
+- **`Tarot Cards`**: Draw single cards, 3-card spreads, or full Celtic Cross layouts, complete with meanings.
+
+### 🛠️ Generators & Tools
+- **`Weighted Random`**: Select from a custom list of items where some items are more likely to be picked than others.
+- **`Decision Matrix`**: Rank options against weighted criteria to find the optimal choice.
+- **`Name Generator`**: Generate random names in Fantasy, Sci-Fi, or Norse styles, optionally with titles.
+- **`Table - Randomizer`** *(Note Action)*: Run this from inside a note to pick random row/column combinations directly from tables.
 
 ### 📜 History & Management
 - **`View Roll History`**: Jump instantly to your `Dice Results Audit` note.

@@ -1527,22 +1527,799 @@ async function viewRollHistory(app) {
   }
 }
 
+// anp-19-dice/lib/quick_presets.js
+async function quick_presets_default(app) {
+  const presets = {
+    "D&D Ability Score": { numDice: 4, faces: 6, keepHighest: true, keepCount: 3 },
+    "D20 Check": { numDice: 1, faces: 20 },
+    "D&D Fireball (8d6)": { numDice: 8, faces: 6 },
+    "D&D Attack (1d8+3)": { numDice: 1, faces: 8, min: 4, max: 11 },
+    "Savage Worlds": { numDice: 2, faces: 6, explode: true, explodeTarget: 6 },
+    "2d6 (standard)": { numDice: 2, faces: 6 },
+    "3d6 (GURPS)": { numDice: 3, faces: 6 },
+    "Fudge/Fate (4dF)": { numDice: 4, faces: "fudge", type: "fudge" },
+    "Coin Flip": { numDice: 1, faces: 2 },
+    "D66 Table": { numDice: 2, faces: 6, sort: "asc", unique: false },
+    "Custom Faces": { numDice: 2, faces: 6 }
+    // Included from step 5 of ds.md
+  };
+  const presetOptions = Object.keys(presets).map((key) => ({
+    label: key,
+    value: key
+  }));
+  const result = await app.prompt("Quick Roll Presets", {
+    inputs: [
+      {
+        label: "Select Preset",
+        type: "select",
+        options: presetOptions,
+        value: "D20 Check"
+      },
+      {
+        label: "Add Modifier (+/-)",
+        type: "string",
+        placeholder: "e.g., +3 or -2"
+      }
+    ]
+  });
+  if (result) {
+    const [presetName, modifierStr] = result;
+    const preset = presets[presetName];
+    const modifier = parseInt(modifierStr) || 0;
+    let rolls, total;
+    if (preset.type === "fudge") {
+      const outcomes = ["-", " ", "+"];
+      rolls = [];
+      total = 0;
+      for (let i = 0; i < preset.numDice; i++) {
+        const roll = Math.floor(Math.random() * 6);
+        const face = outcomes[Math.floor(roll / 2)];
+        rolls.push(face);
+        total += face === "+" ? 1 : face === "-" ? -1 : 0;
+      }
+    } else {
+      const numDice = preset.numDice || 1;
+      const faces = preset.faces || 6;
+      const min = preset.min;
+      const max = preset.max;
+      rolls = [];
+      for (let i = 0; i < numDice; i++) {
+        let roll = Math.floor(Math.random() * faces) + 1;
+        if (min) roll = Math.max(roll, min);
+        if (max) roll = Math.min(roll, max);
+        rolls.push(roll);
+      }
+      if (preset.keepHighest) {
+        rolls.sort((a, b) => b - a);
+        rolls = rolls.slice(0, preset.keepCount);
+      }
+      if (preset.explode) {
+        const newRolls = [...rolls];
+        for (let i = 0; i < newRolls.length; i++) {
+          while (newRolls[i] === preset.explodeTarget) {
+            const extraRoll = Math.floor(Math.random() * faces) + 1;
+            newRolls.push(extraRoll);
+          }
+        }
+        rolls = newRolls;
+      }
+      if (preset.sort === "asc") rolls.sort((a, b) => a - b);
+      total = rolls.reduce((sum, r) => sum + r, 0);
+    }
+    const finalTotal = total + modifier;
+    let finalResult = `<mark>**Quick Roll: ${presetName}**</mark>
+`;
+    finalResult += `**Dice:** [${rolls.join(", ")}]
+`;
+    finalResult += `**Base Total:** ${total}
+`;
+    if (modifier !== 0) finalResult += `**Modifier:** ${modifier > 0 ? "+" : ""}${modifier}
+`;
+    finalResult += `**Final Total:** ${finalTotal}
+`;
+    if (presetName === "Coin Flip") {
+      finalResult += `**Result:** ${rolls[0] === 1 ? "Heads" : "Tails"}
+`;
+    }
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const auditReport = `- <mark>Quick Roll (${presetName}):</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Rolls:** [${rolls.join(", ")}], **Total:** ${finalTotal}</mark>`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/weighted_random.js
+async function weighted_random_default(app) {
+  const existingSetting = await app.settings["Previous_Weighted"];
+  let result;
+  if (existingSetting) {
+    const [items, weights] = existingSetting.split("||");
+    result = await app.prompt("Weighted Random Selector", {
+      inputs: [
+        {
+          label: "Items (comma-separated)",
+          type: "text",
+          value: items,
+          placeholder: "e.g., Sword, Shield, Potion, Gold, Magic Ring"
+        },
+        {
+          label: "Weights (comma-separated, corresponding to items)",
+          type: "text",
+          value: weights,
+          placeholder: "e.g., 10, 20, 30, 25, 15"
+        }
+      ]
+    });
+  } else {
+    result = await app.prompt("Weighted Random Selector", {
+      inputs: [
+        {
+          label: "Items (comma-separated)",
+          type: "text",
+          placeholder: "e.g., Sword, Shield, Potion, Gold, Magic Ring"
+        },
+        {
+          label: "Weights (comma-separated, corresponding to items)",
+          type: "text",
+          placeholder: "e.g., 10, 20, 30, 25, 15"
+        }
+      ]
+    });
+  }
+  if (result) {
+    let weightedRandom = function(items2, weights2) {
+      const totalWeight2 = weights2.reduce((sum, w) => sum + w, 0);
+      let random = Math.random() * totalWeight2;
+      for (let i = 0; i < items2.length; i++) {
+        random -= weights2[i];
+        if (random <= 0) {
+          return items2[i];
+        }
+      }
+      return items2[items2.length - 1];
+    };
+    const [itemsStr, weightsStr] = result;
+    const items = itemsStr.split(",").map((i) => i.trim()).filter((i) => i);
+    const weights = weightsStr.split(",").map((w) => parseFloat(w.trim())).filter((w) => !isNaN(w) && w > 0);
+    if (items.length === 0 || weights.length === 0) {
+      app.alert("Please provide both items and weights.");
+      return;
+    }
+    if (items.length !== weights.length) {
+      app.alert("Number of items must match number of weights.");
+      return;
+    }
+    await app.setSetting("Previous_Weighted", `${itemsStr}||${weightsStr}`);
+    const selected = weightedRandom(items, weights);
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    const probabilities = items.map((item, i) => ({
+      item,
+      weight: weights[i],
+      probability: (weights[i] / totalWeight * 100).toFixed(1)
+    }));
+    let finalResult = `<mark>**Weighted Random Selection**</mark>
+`;
+    finalResult += `**Selected:** ${selected}
+
+`;
+    finalResult += `**Probabilities:**
+`;
+    probabilities.forEach((p) => {
+      finalResult += `- ${p.item}: ${p.probability}% (weight: ${p.weight})
+`;
+    });
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const auditReport = `- <mark>Weighted Random:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Selected:** ${selected}</mark> | Items: ${items.join(", ")} | Weights: ${weights.join(", ")}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/dice_pool.js
+async function dice_pool_default(app) {
+  const existingSetting = await app.settings["Previous_DicePool"];
+  let parsedDefaults = { poolSize: 5, targetNumber: 5, explode: false, countType: "hits" };
+  if (existingSetting) {
+    try {
+      const parts = existingSetting.split(",");
+      parsedDefaults.poolSize = parseInt(parts[0]) || 5;
+      parsedDefaults.targetNumber = parseInt(parts[1]) || 5;
+      parsedDefaults.explode = parts[2] === "true";
+      parsedDefaults.countType = parts[3] || "hits";
+    } catch (e) {
+    }
+  }
+  const result = await app.prompt("Dice Pool Roller", {
+    inputs: [
+      {
+        label: "Number of Dice in Pool",
+        type: "string",
+        value: parsedDefaults.poolSize.toString()
+      },
+      {
+        label: "Target Number (TN) for Success",
+        type: "string",
+        value: parsedDefaults.targetNumber.toString()
+      },
+      {
+        label: "Exploding 6s (re-roll on 6)",
+        type: "checkbox",
+        value: parsedDefaults.explode
+      },
+      {
+        label: "Count Method",
+        type: "select",
+        options: [
+          { label: "Count Hits (dice >= TN)", value: "hits" },
+          { label: "Sum All Dice", value: "sum" },
+          { label: "Count Successes (TN as difficulty)", value: "successes" }
+        ],
+        value: parsedDefaults.countType
+      }
+    ]
+  });
+  if (result) {
+    let rollPool = function(size, tn, exploding = false) {
+      let rolls = [];
+      let successes = 0;
+      let ones = 0;
+      for (let i = 0; i < size; i++) {
+        let roll = Math.floor(Math.random() * 6) + 1;
+        rolls.push(roll);
+        if (roll === 1) ones++;
+        if (roll >= tn) successes++;
+        while (exploding && roll === 6) {
+          roll = Math.floor(Math.random() * 6) + 1;
+          rolls.push(roll);
+          if (roll >= tn) successes++;
+          if (roll === 1) ones++;
+        }
+      }
+      return { rolls, successes, ones };
+    };
+    const [poolSizeStr, targetNumberStr, explode, countType] = result;
+    const poolSize = parseInt(poolSizeStr) || 5;
+    const targetNumber = parseInt(targetNumberStr) || 5;
+    await app.setSetting("Previous_DicePool", `${poolSize},${targetNumber},${explode},${countType}`);
+    const result2 = rollPool(poolSize, targetNumber, explode);
+    let finalResult = `<mark>**Dice Pool Results**</mark>
+`;
+    finalResult += `**Pool Size:** ${poolSize}d6
+`;
+    finalResult += `**Target Number:** ${targetNumber}+
+`;
+    finalResult += `**Dice Rolled:** [${result2.rolls.join(", ")}]
+`;
+    finalResult += `**Successes (>=${targetNumber}):** ${result2.successes}
+`;
+    finalResult += `**Ones (1s):** ${result2.ones}
+`;
+    finalResult += `**Net Successes:** ${result2.successes - result2.ones}
+
+`;
+    finalResult += `**Roll Details:**
+`;
+    for (let i = 0; i < Math.min(result2.rolls.length, poolSize); i++) {
+      const roll = result2.rolls[i];
+      let indicator = roll >= targetNumber ? "\u2713" : roll === 1 ? "\u2717" : "-";
+      finalResult += `Die ${i + 1}: ${roll} ${indicator}
+`;
+    }
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const auditReport = `- <mark>Dice Pool:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Pool: ${poolSize}d6, TN: ${targetNumber}, Explode: ${explode} | <mark>**Successes:** ${result2.successes}, **Net:** ${result2.successes - result2.ones}</mark> | Rolls: [${result2.rolls.join(", ")}]`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/decision_matrix.js
+async function decision_matrix_default(app) {
+  const result = await app.prompt("Decision Matrix Setup", {
+    inputs: [
+      {
+        label: "Options (comma-separated)",
+        type: "text",
+        placeholder: "e.g., Option A, Option B, Option C"
+      },
+      {
+        label: "Criteria (comma-separated)",
+        type: "text",
+        placeholder: "e.g., Cost, Time, Quality, Risk"
+      },
+      {
+        label: "Criteria Weights (comma-separated, 1-10)",
+        type: "text",
+        placeholder: "e.g., 8, 5, 9, 3"
+      }
+    ]
+  });
+  if (result) {
+    const [optionsStr, criteriaStr, weightsStr] = result;
+    const options = optionsStr.split(",").map((o) => o.trim()).filter((o) => o);
+    const criteria = criteriaStr.split(",").map((c) => c.trim()).filter((c) => c);
+    const weights = weightsStr.split(",").map((w) => parseFloat(w.trim())).filter((w) => !isNaN(w));
+    if (options.length < 2 || criteria.length < 2) {
+      app.alert("Need at least 2 options and 2 criteria.");
+      return;
+    }
+    if (criteria.length !== weights.length) {
+      app.alert("Number of criteria must match number of weights.");
+      return;
+    }
+    const scores = [];
+    for (let i = 0; i < options.length; i++) {
+      scores[i] = [];
+      for (let j = 0; j < criteria.length; j++) {
+        scores[i][j] = Math.floor(Math.random() * 10) + 1;
+      }
+    }
+    const weightedScores = options.map((option, i) => {
+      let total = 0;
+      criteria.forEach((criterion, j) => {
+        total += scores[i][j] * weights[j];
+      });
+      return { option, total, scores: scores[i] };
+    });
+    weightedScores.sort((a, b) => b.total - a.total);
+    let finalResult = `<mark>**Decision Matrix Results**</mark>
+
+`;
+    finalResult += `| Option | ${criteria.join(" | ")} | **Total** |
+`;
+    finalResult += `|${"---|".repeat(criteria.length + 2)}
+`;
+    weightedScores.forEach((item) => {
+      finalResult += `| ${item.option} | ${item.scores.join(" | ")} | **${item.total}** |
+`;
+    });
+    finalResult += `
+<mark>**Rankings:**</mark>
+`;
+    weightedScores.forEach((item, i) => {
+      const medal = i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `${i + 1}.`;
+      finalResult += `${medal} **${item.option}** - Score: ${item.total}
+`;
+    });
+    finalResult += `
+**Criteria Weights:** ${criteria.map((c, i) => `${c}: ${weights[i]}`).join(", ")}`;
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const winner = weightedScores[0];
+        const auditReport = `- <mark>Decision Matrix:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Winner:** ${winner.option} (Score: ${winner.total})</mark> | Options: ${options.join(", ")} | Criteria: ${criteria.join(", ")}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/name_generator.js
+async function name_generator_default(app) {
+  const nameStyles = {
+    fantasy: {
+      prefixes: ["Al", "An", "Ar", "Bal", "Bel", "Bor", "Bri", "Cor", "Dar", "El", "Eld", "Far", "Gal", "Gil", "Hal", "Is", "Kal", "Kil", "Lan", "Mor", "Nor", "Pal", "Quin", "Ral", "Sam", "Tal", "Thal", "Ul", "Val", "Wil", "Xan", "Yor", "Zan"],
+      suffixes: ["dor", "mir", "ion", "gar", "mar", "nar", "rin", "thir", "wen", "wyn", "lor", "din", "dan", "bar", "nor", "lan", "dar", "ran", "reth", "las", "mas", "nir", "ril", "dis", "ric", "mond", "ton", "ley", "burg", "heim"]
+    },
+    scifi: {
+      prefixes: ["Ax", "Cy", "Dex", "Echo", "Flux", "Geo", "Hex", "Ion", "Jax", "Kai", "Lex", "Max", "Nex", "Onyx", "Pax", "Quark", "Rex", "Sol", "Tech", "Ultra", "Vex", "Warp", "Xen", "Yotta", "Zero"],
+      suffixes: ["oid", "ite", "ian", "ium", "ax", "ex", "ox", "ux", "on", "ar", "or", "us", "is", "os", "eon", "tron", "wave", "pulse", "beam", "core"]
+    },
+    norse: {
+      prefixes: ["As", "Bjorn", "Egil", "Fen", "Gunn", "Hal", "Ing", "Jar", "Knut", "Leif", "Magn", "Njord", "Odd", "Ragn", "Sig", "Thor", "Ulf", "Val", "Yng", "Odin"],
+      suffixes: ["ar", "ir", "ur", "olf", "bjorn", "stein", "vald", "mund", "mar", "rik", "ulf", "vard", "brand", "fast", "grim", "hild", "laug", "leif", "mod", "run"]
+    }
+  };
+  const result = await app.prompt("Random Name Generator", {
+    inputs: [
+      {
+        label: "Name Style",
+        type: "select",
+        options: [
+          { label: "Fantasy", value: "fantasy" },
+          { label: "Sci-Fi", value: "scifi" },
+          { label: "Norse", value: "norse" },
+          { label: "Mixed (Random Style)", value: "mixed" }
+        ],
+        value: "fantasy"
+      },
+      {
+        label: "Number of Names to Generate",
+        type: "string",
+        value: "5"
+      },
+      {
+        label: "Include Titles/Prefixes",
+        type: "checkbox",
+        value: false
+      }
+    ]
+  });
+  if (result) {
+    let generateName = function(styleName) {
+      let selectedStyle;
+      if (styleName === "mixed") {
+        const styles = Object.keys(nameStyles);
+        selectedStyle = nameStyles[styles[Math.floor(Math.random() * styles.length)]];
+      } else {
+        selectedStyle = nameStyles[styleName];
+      }
+      const prefix = selectedStyle.prefixes[Math.floor(Math.random() * selectedStyle.prefixes.length)];
+      const suffix = selectedStyle.suffixes[Math.floor(Math.random() * selectedStyle.suffixes.length)];
+      const name = prefix + suffix;
+      if (includeTitles) {
+        const title = titles[Math.floor(Math.random() * titles.length)];
+        return `${title} ${name}`;
+      }
+      return name;
+    };
+    const [style, countStr, includeTitles] = result;
+    const count = Math.min(parseInt(countStr) || 5, 20);
+    const titles = ["Sir", "Lady", "Lord", "Captain", "Commander", "Archmage", "King", "Queen", "Prince", "Princess", "Master", "Doctor", "Professor", "Admiral", "Baron"];
+    let finalResult = `<mark>**Generated Names (${style})**</mark>
+
+`;
+    const names = [];
+    for (let i = 0; i < count; i++) {
+      const name = generateName(style);
+      names.push(name);
+      finalResult += `${i + 1}. ${name}
+`;
+    }
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const auditReport = `- <mark>Name Generator:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Style: ${style}, Count: ${count} | <mark>**Names:** ${names.join(", ")}</mark>`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/tarot.js
+async function tarot_default(app) {
+  const majorArcana = [
+    { name: "The Fool", number: 0, meaning: "New beginnings, innocence, spontaneity" },
+    { name: "The Magician", number: 1, meaning: "Power, skill, concentration, action" },
+    { name: "The High Priestess", number: 2, meaning: "Intuition, mystery, subconscious mind" },
+    { name: "The Empress", number: 3, meaning: "Fertility, nature, abundance, sensuality" },
+    { name: "The Emperor", number: 4, meaning: "Authority, structure, control, fatherhood" },
+    { name: "The Hierophant", number: 5, meaning: "Tradition, conformity, morality, ethics" },
+    { name: "The Lovers", number: 6, meaning: "Love, harmony, relationships, values alignment" },
+    { name: "The Chariot", number: 7, meaning: "Control, willpower, success, determination" },
+    { name: "Strength", number: 8, meaning: "Strength, courage, persuasion, compassion" },
+    { name: "The Hermit", number: 9, meaning: "Soul-searching, introspection, being alone" },
+    { name: "Wheel of Fortune", number: 10, meaning: "Good luck, karma, life cycles, destiny" },
+    { name: "Justice", number: 11, meaning: "Justice, fairness, truth, cause and effect" },
+    { name: "The Hanged Man", number: 12, meaning: "Pause, surrender, letting go, new perspectives" },
+    { name: "Death", number: 13, meaning: "Endings, change, transformation, transition" },
+    { name: "Temperance", number: 14, meaning: "Balance, moderation, patience, purpose" },
+    { name: "The Devil", number: 15, meaning: "Shadow self, attachment, addiction, restriction" },
+    { name: "The Tower", number: 16, meaning: "Disaster, upheaval, sudden change, revelation" },
+    { name: "The Star", number: 17, meaning: "Hope, faith, purpose, renewal, spirituality" },
+    { name: "The Moon", number: 18, meaning: "Illusion, fear, anxiety, subconscious, intuition" },
+    { name: "The Sun", number: 19, meaning: "Positivity, fun, warmth, success, vitality" },
+    { name: "Judgment", number: 20, meaning: "Judgment, rebirth, inner calling, absolution" },
+    { name: "The World", number: 21, meaning: "Completion, integration, accomplishment, travel" }
+  ];
+  const result = await app.prompt("Tarot Card Draw", {
+    inputs: [
+      {
+        label: "Question or Focus (optional)",
+        type: "text",
+        placeholder: "What do you seek guidance on?"
+      },
+      {
+        label: "Spread Type",
+        type: "select",
+        options: [
+          { label: "Single Card", value: "single" },
+          { label: "Three Card (Past/Present/Future)", value: "three" },
+          { label: "Celtic Cross (10 Cards)", value: "celtic" }
+        ],
+        value: "single"
+      },
+      {
+        label: "Allow Reversed Cards",
+        type: "checkbox",
+        value: true
+      }
+    ]
+  });
+  if (result) {
+    let shuffleDeck = function() {
+      const deck = [...majorArcana];
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    }, drawCards = function(count, reversed) {
+      const deck = shuffleDeck();
+      const drawn = [];
+      for (let i = 0; i < count; i++) {
+        const card = deck[i];
+        const isReversed = reversed ? Math.random() < 0.5 : false;
+        drawn.push({
+          ...card,
+          reversed: isReversed,
+          fullMeaning: isReversed ? `${card.meaning} (Reversed: opposite or blocked energy)` : card.meaning
+        });
+      }
+      return drawn;
+    };
+    const [question, spreadType, allowReversed] = result;
+    const cardCount = spreadType === "single" ? 1 : spreadType === "three" ? 3 : 10;
+    const cards = drawCards(cardCount, allowReversed);
+    let finalResult = `<mark>**Tarot Reading**</mark>
+`;
+    if (question) finalResult += `**Question:** ${question}
+
+`;
+    if (spreadType === "single") {
+      const card = cards[0];
+      finalResult += `**Card:** ${card.name} ${card.reversed ? "(Reversed)" : ""}
+`;
+      finalResult += `**Meaning:** ${card.fullMeaning}
+`;
+    } else if (spreadType === "three") {
+      const positions = ["Past", "Present", "Future"];
+      finalResult += `**Three Card Spread**
+
+`;
+      cards.forEach((card, i) => {
+        finalResult += `**${positions[i]}:** ${card.name} ${card.reversed ? "(Reversed)" : ""}
+`;
+        finalResult += `*${card.fullMeaning}*
+
+`;
+      });
+    } else {
+      const positions = [
+        "Present Situation",
+        "Challenge",
+        "Past Foundation",
+        "Recent Past",
+        "Possible Outcome",
+        "Near Future",
+        "Your Approach",
+        "External Influences",
+        "Hopes/Fears",
+        "Final Outcome"
+      ];
+      finalResult += `**Celtic Cross Spread**
+
+`;
+      cards.forEach((card, i) => {
+        finalResult += `**${positions[i]}:** ${card.name} ${card.reversed ? "(Reversed)" : ""}
+`;
+        finalResult += `*${card.fullMeaning}*
+
+`;
+      });
+    }
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const cardNames = cards.map((c) => c.name + (c.reversed ? " (R)" : "")).join(", ");
+        const auditReport = `- <mark>Tarot:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Spread: ${spreadType} | <mark>**Cards:** ${cardNames}</mark> | Q: ${question || "N/A"}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
+// anp-19-dice/lib/percentile.js
+async function percentile_default(app) {
+  const result = await app.prompt("Percentile Roll (D100)", {
+    inputs: [
+      {
+        label: "Target Number (1-100, leave blank for open roll)",
+        type: "string",
+        placeholder: "e.g., 65"
+      },
+      {
+        label: "Roll Type",
+        type: "select",
+        options: [
+          { label: "Standard (00-99)", value: "standard" },
+          { label: "1-100 (00 = 100)", value: "one_to_hundred" },
+          { label: "Flip to Succeed (CoC style)", value: "flip" }
+        ],
+        value: "one_to_hundred"
+      }
+    ]
+  });
+  if (result) {
+    let rollD100 = function(type) {
+      const tens = Math.floor(Math.random() * 10) * 10;
+      const ones = Math.floor(Math.random() * 10);
+      if (type === "standard") {
+        return tens + ones;
+      } else if (type === "one_to_hundred") {
+        return tens === 0 && ones === 0 ? 100 : tens + ones;
+      } else if (type === "flip") {
+        const roll2 = tens + ones;
+        const effectiveRoll = roll2 === 0 ? 100 : roll2;
+        return {
+          roll: effectiveRoll,
+          tensDigit: Math.floor(tens / 10),
+          onesDigit: ones,
+          flipped: Math.floor(tens / 10) * 1 + ones * 10
+        };
+      }
+    };
+    const [targetStr, rollType] = result;
+    const target = parseInt(targetStr);
+    let finalResult = `<mark>**Percentile Roll**</mark>
+`;
+    let roll;
+    if (rollType === "flip" && target) {
+      roll = rollD100("flip");
+      const normalSuccess = roll.roll <= target;
+      const flipSuccess = roll.flipped <= target;
+      finalResult += `**Tens Die:** ${roll.tensDigit} | **Ones Die:** ${roll.onesDigit}
+`;
+      finalResult += `**Roll:** ${roll.roll} (Target: <=${target})
+`;
+      finalResult += `**Flipped Roll:** ${roll.flipped}
+
+`;
+      if (normalSuccess && flipSuccess) {
+        finalResult += `**Result:** Critical Success! (Both rolls succeed)`;
+      } else if (normalSuccess || flipSuccess) {
+        finalResult += `**Result:** Regular Success (One roll succeeds)`;
+      } else {
+        finalResult += `**Result:** Failure`;
+      }
+    } else {
+      roll = rollD100(rollType);
+      finalResult += `**Roll:** ${roll}
+`;
+      if (target) {
+        const success = rollType === "standard" ? roll < target : roll <= target;
+        finalResult += `**Target:** <=${target}
+`;
+        finalResult += `**Result:** ${success ? "Success! \u2713" : "Failure \u2717"}
+`;
+        if (rollType === "one_to_hundred") {
+          if (roll === 1) finalResult += `**Critical Success!** \u{1F3AF}
+`;
+          if (roll === 100) finalResult += `**Fumble!** \u{1F4A5}
+`;
+          if (roll === target) finalResult += `**Exactly target!** \u{1F44C}
+`;
+        }
+      }
+    }
+    finalResult += `
+**Roll Type:** ${rollType}`;
+    const now = /* @__PURE__ */ new Date();
+    const YYMMDD = now.toISOString().slice(2, 10).replace(/-/g, "");
+    const HHMMSS = now.toTimeString().slice(0, 8).replace(/:/g, "");
+    const auditNoteName = `Dice Results Audit`;
+    const auditTagName = ["-reports/-dice"];
+    const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
+    (async () => {
+      try {
+        const rollValue = typeof roll === "object" ? roll.roll : roll;
+        const success = target ? rollValue <= target ? "Success" : "Fail" : "Open";
+        const auditReport = `- <mark>Percentile:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Roll:** ${rollValue}, **Target:** ${target || "Open"}, **Result:** ${success}</mark> | Type: ${rollType}`;
+        await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
+        await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
+        app.alert(finalResult);
+      } catch (error) {
+        console.error(error.message);
+      }
+    })();
+  }
+}
+
 // anp-19-dice/dice.js
+function wrapFeature(featureName, moduleFunc) {
+  return async function(app, ...args) {
+    try {
+      const statsStr = await app.settings["Dice_Usage_Stats"];
+      const stats = statsStr ? JSON.parse(statsStr) : {};
+      stats[featureName] = (stats[featureName] || 0) + 1;
+      await app.setSetting("Dice_Usage_Stats", JSON.stringify(stats));
+      await moduleFunc(app, ...args);
+    } catch (error) {
+      console.error(`Plugin Error in [${featureName}]:`, error);
+      app.alert(`An error occurred in ${featureName}:
+${error.message}`);
+    }
+  };
+}
 var dice_default = {
   appOption: {
-    "Basic": basic_default,
-    "Advanced": advanced_default,
-    "Specialized": specialized_default,
-    "8 Ball": ball_default,
-    "Ask Sai Baba": ask_sai_baba_default,
-    "Fudge/Fate": fudge_fate_default,
-    "Fantasy AGE Stunt - Single Roll": fantasy_age_stunt_single_roll_default,
-    "Fantasy AGE Stunt - Roll All At Once": fantasy_age_stunt_roll_all_at_once_default,
-    "View Roll History": viewRollHistory,
-    "Clear Audit History": clearAuditHistory
+    // General Dice
+    "Basic": wrapFeature("Basic", basic_default),
+    "Advanced": wrapFeature("Advanced", advanced_default),
+    "Quick Roll Presets": wrapFeature("Quick Roll Presets", quick_presets_default),
+    "Percentile (D100)": wrapFeature("Percentile (D100)", percentile_default),
+    // Game Systems
+    "Fudge/Fate": wrapFeature("Fudge/Fate", fudge_fate_default),
+    "Fantasy AGE Stunt - Single Roll": wrapFeature("Fantasy AGE Stunt - Single Roll", fantasy_age_stunt_single_roll_default),
+    "Fantasy AGE Stunt - Roll All At Once": wrapFeature("Fantasy AGE Stunt - Roll All At Once", fantasy_age_stunt_roll_all_at_once_default),
+    "Dice Pool (Shadowrun/WoD)": wrapFeature("Dice Pool (Shadowrun/WoD)", dice_pool_default),
+    // Oracles & Divination
+    "Specialized": wrapFeature("Specialized", specialized_default),
+    "8 Ball": wrapFeature("8 Ball", ball_default),
+    "Ask Sai Baba": wrapFeature("Ask Sai Baba", ask_sai_baba_default),
+    "Tarot Cards": wrapFeature("Tarot Cards", tarot_default),
+    // Generators & Tools
+    "Weighted Random": wrapFeature("Weighted Random", weighted_random_default),
+    "Decision Matrix": wrapFeature("Decision Matrix", decision_matrix_default),
+    "Name Generator": wrapFeature("Name Generator", name_generator_default),
+    // History
+    "View Roll History": wrapFeature("View Roll History", viewRollHistory),
+    "Clear Audit History": wrapFeature("Clear Audit History", clearAuditHistory)
   },
   noteOption: {
-    "Table - Randomizer": table_randomizer_default
+    "Table - Randomizer": wrapFeature("Table - Randomizer", table_randomizer_default)
   }
 };
 

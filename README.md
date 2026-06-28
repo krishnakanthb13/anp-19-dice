@@ -21,16 +21,19 @@
 
 | Field | Value |
 | :--- | :--- |
-| `name` | Dice Roller and Randomizer |
-| `description` | Roll dice, evaluate formulas, randomize tables, and save results. |
-| `icon` | casino |
-| `settings` | |
-| `Previous_Roll` | |
-| `Previous_Roll_Spc` | |
-| `Previous_Roll_FF` | |
-| `Previous_Roll_AGE` | |
-| `Previous_Roll_Ran` | |
-| `Dice_Audit_UUID [Do not Edit!]` | |
+|name|Dice - Testing|
+|icon|casino|
+|description<!-- {"cell":{"colwidth":108}} -->|Simple, Advanced, Specialized Dice Randomizer.<br />Open Random Notes to review or revisit based on different Note Properties (In Basic Option).<br />Randomize any Table in Amplenote.<br />Have some of your favorite games rolled here at Amplenote.|
+|instructions<!-- {"cell":{"colwidth":108}} -->|- Run the Dice: Basicfrom App Options by ctrl / cmd + o.<br />- At first, it give you blank boxes to fill up. (Next time it remember your previous inputs).<br />- You can play around with the options listed to get an extensive range of a result.<br />- Using, Look Up in your Notes option, you can select any available dropdowns for the Plugin to take you to the random note.<br />- Audit page has all the Dice rolls and other details depending on your selection.<br />Note: More options are on its way. Comment in the Installation page for any feedback or suggestion.<br />- New features added (All features) - December 29th, 2024<br />     - (note-Option) Table - Randomizer.<br />     - (app-Option) Basic, Advanced, Specialized, 8 Ball, Ask Sai Baba, Fudge/Fate, Fantasy AGE Stunt - (Single Roll, Roll All At Once)..|
+|setting|Previous_Roll|
+|setting|Previous_Roll_ADV1 (Not in use)|
+|setting|Previous_Roll_ADV2 (Not in use)|
+|setting|Previous_Roll_Spc|
+|setting|Previous_Roll_FF|
+|setting|Previous_Roll_AGE|
+|setting|Previous_Roll_Ran|
+|setting|Dice_Audit_UUID \[Do not Edit!\]|
+
 
 *(Note: Leave the setting values blank during first installation. The plugin will manage them automatically.)*
 

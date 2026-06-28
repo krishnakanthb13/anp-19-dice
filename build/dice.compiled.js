@@ -81,41 +81,41 @@ async function basic_default(app) {
       if ([4, 6, 8, 11, 12].includes(index)) return String(value).toLowerCase() === "true";
       return value;
     });
-    result = await app.prompt("Roll the Dice! (Previous Roll is remembered)", {
+    result = await app.prompt("Configure Your Dice Roll (Recall settings)", {
       inputs: [
         { label: "Number of Dice", type: "string", value: numDicez },
         { label: "Number of Faces", type: "string", value: facesz },
-        { label: "Minimum Number (Limit)", type: "string", value: minz },
-        { label: "Maximum Number (Limit)", type: "string", value: maxz },
-        { label: "Keep Highest Roll (Drop the remaining)", type: "checkbox", value: keepHighestz },
-        { label: "Keep Highest Roll Count", type: "string", value: keepCountz },
-        { label: "Drop Highest Roll (keep the remaining)", type: "checkbox", value: dropHighestz },
-        { label: "Drop Highest Roll Count", type: "string", value: dropCountz },
-        { label: "Explode (An additional Die)", type: "checkbox", value: explodez },
-        { label: "Explode Target", type: "string", value: explodeTargetz },
-        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: sortOptionz || 1 },
-        { label: "Unique (Every Die is Unique)", type: "checkbox", value: uniquez },
-        { label: "Navigate to the Looked Up Note", type: "checkbox", value: navigateToNotez },
-        { label: "Look Up in your Notes (Sorted By)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: lookUpz || 5 }
+        { label: "Minimum Roll Limit", type: "string", value: minz },
+        { label: "Maximum Roll Limit", type: "string", value: maxz },
+        { label: "Keep Highest Rolls (Discard the rest)", type: "checkbox", value: keepHighestz },
+        { label: "Count of Highest Rolls to Keep", type: "string", value: keepCountz },
+        { label: "Drop Highest Rolls (Keep the rest)", type: "checkbox", value: dropHighestz },
+        { label: "Count of Highest Rolls to Drop", type: "string", value: dropCountz },
+        { label: "Exploding Dice (Roll again on max value)", type: "checkbox", value: explodez },
+        { label: "Explode Target Value", type: "string", value: explodeTargetz },
+        { label: "Sort Results", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: sortOptionz || 1 },
+        { label: "Unique Results Only (No duplicates)", type: "checkbox", value: uniquez },
+        { label: "Open Retrieved Note Automatically", type: "checkbox", value: navigateToNotez },
+        { label: "Lookup Note (Order by)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: lookUpz || 5 }
       ]
     });
   } else {
-    result = await app.prompt("Roll the Dice!", {
+    result = await app.prompt("Configure Your Dice Roll", {
       inputs: [
         { label: "Number of Dice", type: "string" },
         { label: "Number of Faces", type: "string" },
-        { label: "Minimum Number", type: "string" },
-        { label: "Maximum Number", type: "string" },
-        { label: "Keep Highest Roll", type: "checkbox" },
-        { label: "Keep Highest Roll Count", type: "string" },
-        { label: "Drop Highest Roll", type: "checkbox" },
-        { label: "Drop Highest Roll Count", type: "string" },
-        { label: "Explode", type: "checkbox" },
-        { label: "Explode Target", type: "string" },
-        { label: "Sort the output", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: 1 },
-        { label: "Unique", type: "checkbox" },
-        { label: "Navigate to the Looked Up Note", type: "checkbox", value: false },
-        { label: "Look Up in your Notes (Sorted By)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: 5 }
+        { label: "Minimum Roll Limit", type: "string" },
+        { label: "Maximum Roll Limit", type: "string" },
+        { label: "Keep Highest Rolls (Discard the rest)", type: "checkbox" },
+        { label: "Count of Highest Rolls to Keep", type: "string" },
+        { label: "Drop Highest Rolls (Keep the rest)", type: "checkbox" },
+        { label: "Count of Highest Rolls to Drop", type: "string" },
+        { label: "Exploding Dice (Roll again on max value)", type: "checkbox" },
+        { label: "Explode Target Value", type: "string" },
+        { label: "Sort Results", type: "select", options: [{ label: "None", value: 1 }, { label: "Ascending", value: 2 }, { label: "Descending", value: 3 }], value: 1 },
+        { label: "Unique Results Only (No duplicates)", type: "checkbox" },
+        { label: "Open Retrieved Note Automatically", type: "checkbox", value: false },
+        { label: "Lookup Note (Order by)", type: "select", options: [{ label: "None", value: 5 }, { label: "Name", value: 1 }, { label: "Created", value: 2 }, { label: "Modified", value: 3 }, { label: "UUID", value: 6 }, { label: "Tags", value: 7 }, { label: "Random", value: 4 }], value: 5 }
       ]
     });
   }
@@ -519,10 +519,10 @@ async function advanced_default(app) {
 3d4 + 3,
 1d12 + 1d10 + 5,
 3d4+3d4-(3d4 * 1d4) - 2^1d7`;
-    const result = await app.prompt("Add / Modify the Formulas that you want to run the Dice for.", {
+    const result = await app.prompt("Evaluate Custom Dice Formulas", {
       inputs: [
-        { label: "Single Dice Formula", type: "string", value: `1d2` },
-        { label: "Multiple Dice Formulas", type: "text", value: `${examplez}` }
+        { label: "Single Roll Formula (e.g., 2d6 + 5)", type: "string", value: `1d2` },
+        { label: "Batch Roll Formulas (One per line or comma-separated)", type: "text", value: `${examplez}` }
       ]
     });
     if (result) {
@@ -576,12 +576,12 @@ async function specialized_default(app) {
     pokerVariz,
     addProbz
   ] = (existingSetting || "").split(",");
-  const result = await app.prompt("Select the approprate parameters!", {
+  const result = await app.prompt("Configure Specialized Dice Roll", {
     inputs: [
       { label: "Number of Dice", type: "string", value: numDicez || 5 },
-      { label: "Select the Specialized Dice.", type: "select", options: [{ label: "Sicherman Dice", value: "sicherman" }, { label: "Intransitive Dice", value: "intransitive" }, { label: "Poker Dice", value: "poker" }], value: specializedDicez || "poker" },
-      { label: "Select the Poker Variation.", type: "select", options: [{ label: "Standard", value: "standard" }, { label: "Numeric", value: "numeric" }, { label: "Crown", value: "crown" }], value: pokerVariz || "standard" },
-      { label: "Add probabilities", type: "checkbox", value: addProbz || false }
+      { label: "Specialized Dice Type", type: "select", options: [{ label: "Sicherman Dice", value: "sicherman" }, { label: "Intransitive Dice", value: "intransitive" }, { label: "Poker Dice", value: "poker" }], value: specializedDicez || "poker" },
+      { label: "Poker Variation (If Poker selected)", type: "select", options: [{ label: "Standard", value: "standard" }, { label: "Numeric", value: "numeric" }, { label: "Crown", value: "crown" }], value: pokerVariz || "standard" },
+      { label: "Calculate & Show Probabilities", type: "checkbox", value: addProbz || false }
     ]
   });
   const [
@@ -911,9 +911,9 @@ ${intransitiveResult.rolls}
 
 // anp-19-dice/lib/8_ball.js
 async function ball_default(app) {
-  const result = await app.prompt("Shake the 8 Ball!", {
+  const result = await app.prompt("Consult the Magic 8-Ball", {
     inputs: [
-      { label: "Ask a Question", placeholder: ">>> Keep questions simple and direct, focus on a single issue, and use yes/no or should I/should I not formats. Eg: Will I find love this year? / Will I win the lottery? / Will it rain tomorrow?", type: "text" }
+      { label: "Your Question", placeholder: 'Ask a direct yes/no question (e.g., "Will I achieve my goal today?")', type: "text" }
     ]
   });
   let answer;
@@ -964,11 +964,11 @@ async function ball_default(app) {
 
 // anp-19-dice/lib/ask_sai_baba.js
 async function ask_sai_baba_default(app) {
-  const result = await app.prompt("Ask Sai Baba. Think deeply about the problem you wish to solve and sincerely seek Sai Baba's guidance. Ask him to suggest a single number between 1 and 720 as an answer. A number will intuitively come to your mind. Type this number into the provided answer box. This number you have intuitively chosen represents Shirdi Sai Baba's answer to your query. Ensure the number you enter falls within the range of 1 to 720. The corresponding answer from Sai Baba will be offering clear and concise guidance.", {
+  const result = await app.prompt("Seek Shirdi Sai Baba's Guidance. Reflect deeply on your question, then let a number between 1 and 720 intuitively enter your mind. Type that number below to receive his answer.", {
     inputs: [
-      { label: "Ask Sai Baba a question.", placeholder: ">>> Keep questions simple, if you want to keep it in your mind, you can type something which you only can connect back too.", type: "text" },
-      { label: "Enter a Number.", placeholder: "Number between 1-720", type: "string" },
-      { label: "Random.", type: "checkbox", value: false }
+      { label: "Your Question", placeholder: "Reflect deeply on your question. You can type it here or keep it in mind.", type: "text" },
+      { label: "Enter an Intuitive Number (1-720)", placeholder: "Type a number from 1 to 720 that comes to mind", type: "string" },
+      { label: "Select Random Number", type: "checkbox", value: false }
     ]
   });
   if (result) {
@@ -1032,7 +1032,7 @@ async function fudge_fate_default(app) {
   }
   async function main() {
     const numDicez = existingSetting;
-    const result = await app.prompt("Fudge/Fate, Roll the Dice!", {
+    const result = await app.prompt("Roll Fudge/Fate Dice", {
       inputs: [
         { label: "Number of Dice", type: "string", value: numDicez || 4 }
       ]
@@ -1134,17 +1134,17 @@ async function fantasy_age_stunt_roll_all_at_once_default(app) {
       if ([0, 1].includes(index)) return Number(value) || defaults[index];
       return value;
     });
-    result = await app.prompt("Fantasy AGE Stunt - Roll All At Once!", {
+    result = await app.prompt("Roll Fantasy AGE Stunts (All Players)", {
       inputs: [
         { label: "Number of Players", type: "string", value: playerCountz },
-        { label: "Number of Characters Per Player", type: "string", value: charactersPerPlayerz }
+        { label: "Characters Per Player", type: "string", value: charactersPerPlayerz }
       ]
     });
   } else {
-    result = await app.prompt("Fantasy AGE Stunt - Roll All At Once!", {
+    result = await app.prompt("Roll Fantasy AGE Stunts (All Players)", {
       inputs: [
         { label: "Number of Players", type: "string", value: 3 },
-        { label: "Number of Characters Per Player", type: "string", value: 2 }
+        { label: "Characters Per Player", type: "string", value: 2 }
       ]
     });
   }
@@ -1294,17 +1294,17 @@ async function table_randomizer_default(app, noteUUID) {
   }
   const existingSetting = await app.settings["Previous_Roll_Ran"];
   const result = await app.prompt(
-    "Fill in or Update the Details, based on your requirments.",
+    "Configure Table Randomizer",
     {
       inputs: [
         {
-          label: "Select the Table - To Randomize!",
+          label: "Choose Table to Randomize",
           type: "radio",
           options: numberOfTables,
           value: "All"
         },
         { label: "Select number of Randomizations.", type: "string", value: existingSetting || 3 },
-        { label: "The Table has Headers", type: "checkbox", value: true }
+        { label: "First row is header (skip from selection)", type: "checkbox", value: true }
       ]
     }
   );
@@ -1496,8 +1496,8 @@ async function table_randomizer_default(app, noteUUID) {
 
 // anp-19-dice/lib/history.js
 async function clearAuditHistory(app) {
-  const confirm = await app.prompt("Clear all dice audit history?", {
-    inputs: [{ label: "Type 'YES' to confirm", type: "string" }]
+  const confirm = await app.prompt("Confirm Deletion", {
+    inputs: [{ label: "Type 'YES' to clear all dice audit history", type: "string" }]
   });
   if (confirm && confirm[0] === "YES") {
     const uuid = await app.settings["Dice_Audit_UUID [Do not Edit!]"];

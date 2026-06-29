@@ -25,15 +25,17 @@
 | `name` | Dice Roller and Randomizer |
 | `icon` | casino |
 | `description` | Comprehensive dice rolling, game systems, and random generators for Amplenote. |
-| `settings` | |
-| `Previous_Roll` | |
-| `Previous_Roll_Spc` | |
-| `Previous_Roll_FF` | |
-| `Previous_Roll_AGE` | |
-| `Previous_Roll_Ran` | |
-| `Previous_Weighted` | |
-| `Previous_DicePool` | |
-| `Dice_Audit_UUID [Do not Edit!]` | |
+| `setting` | `Previous_Roll` |
+| `setting` | `Previous_Roll_ADV1` (Not in use) |
+| `setting` | `Previous_Roll_ADV2` (Not in use) |
+| `setting` | `Previous_Roll_Spc` |
+| `setting` | `Previous_Roll_FF` |
+| `setting` | `Previous_Roll_AGE` |
+| `setting` | `Previous_Roll_Ran` |
+| `setting` | `Previous_Weighted` |
+| `setting` | `Previous_DicePool` |
+| `setting` | `Dice_Usage_Stats` |
+| `setting` | `Dice_Audit_UUID [Do not Edit!]` |
 
 *(Note: Leave the setting values blank during first installation. The plugin will manage them automatically.)*
 

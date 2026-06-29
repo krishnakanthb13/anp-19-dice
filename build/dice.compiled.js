@@ -1627,12 +1627,9 @@ async function quick_presets_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^PRESET]
-[^PRESET]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Quick Roll (${presetName}):</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Preset Report:**</mark> ${finalResultz}`;
+        const auditReport = `- <mark>Quick Roll (${presetName}):</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Rolls:** [${rolls.join(", ")}], **Total:** ${finalTotal}</mark>`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -1728,12 +1725,9 @@ async function weighted_random_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^WEIGHTED]
-[^WEIGHTED]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Weighted Random:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Weighted Report:**</mark> ${finalResultz}`;
+        const auditReport = `- <mark>Weighted Random:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Selected:** ${selected}</mark> | Items: ${items.join(", ")} | Weights: ${weights.join(", ")}`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -1839,12 +1833,9 @@ async function dice_pool_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^POOL]
-[^POOL]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Dice Pool:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Pool Report:**</mark> ${finalResultz}`;
+        const auditReport = `- <mark>Dice Pool:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Pool: ${poolSize}d6, TN: ${targetNumber}, Explode: ${explode} | <mark>**Successes:** ${result2.successes}, **Net:** ${result2.successes - result2.ones}</mark> | Rolls: [${result2.rolls.join(", ")}]`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -1928,12 +1919,10 @@ async function decision_matrix_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^DECISION]
-[^DECISION]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Decision Matrix:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Matrix Report:**</mark> ${finalResultz}`;
+        const winner = weightedScores[0];
+        const auditReport = `- <mark>Decision Matrix:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Winner:** ${winner.option} (Score: ${winner.total})</mark> | Options: ${options.join(", ")} | Criteria: ${criteria.join(", ")}`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -2020,12 +2009,9 @@ Names: `;
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^NAMEGEN]
-[^NAMEGEN]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Name Generator:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Name Gen Report:**</mark> ${finalResultz}`;
+        const auditReport = `- <mark>Name Generator:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Style: ${style}, Count: ${count} | <mark>**Names:** ${names.join(", ")}</mark>`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -2159,12 +2145,10 @@ async function tarot_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^TAROT]
-[^TAROT]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Tarot:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Tarot Report:**</mark> ${finalResultz}`;
+        const cardNames = cards.map((c) => c.name + (c.reversed ? " (R)" : "")).join(", ");
+        const auditReport = `- <mark>Tarot:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; Spread: ${spreadType} | <mark>**Cards:** ${cardNames}</mark> | Q: ${question || "N/A"}`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);
@@ -2264,12 +2248,11 @@ async function percentile_default(app) {
     const auditNoteName = `Dice Results Audit`;
     const auditTagName = ["-reports/-dice"];
     const auditnoteUUID = await getNoteUUID(app, auditNoteName, auditTagName);
-    const finalResultz = `[Report][^PERCENTILE]
-[^PERCENTILE]: []()${finalResult.trim()}
-`;
     (async () => {
       try {
-        const auditReport = `- <mark>Percentile:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Percentile Report:**</mark> ${finalResultz}`;
+        const rollValue = typeof roll === "object" ? roll.roll : roll;
+        const success = target ? rollValue <= target ? "Success" : "Fail" : "Open";
+        const auditReport = `- <mark>Percentile:</mark> ***When:** ${YYMMDD}_${HHMMSS}*; <mark>**Roll:** ${rollValue}, **Target:** ${target || "Open"}, **Result:** ${success}</mark> | Type: ${rollType}`;
         await app.insertNoteContent({ uuid: auditnoteUUID }, auditReport);
         await app.navigate(`https://www.amplenote.com/notes/${auditnoteUUID}`);
         app.alert(finalResult);

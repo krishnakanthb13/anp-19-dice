@@ -1,0 +1,107 @@
+﻿  console.log
+    No valid notes available to pick.
+
+      at sortNotesByLookUp (anp-19-dice/lib/utils.js:126:13)
+
+  console.error
+    Error fetching notes: Error: Network error
+        at Object.<anonymous> (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\anp-19-dice\test\utils.test.js:102:47)
+        at Promise.then.completed (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\utils.js:231:10)
+        at _callCircusTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:316:40)
+        at _runTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:252:3)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:126:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at run (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:71:3)
+        at runAndTransformResultsToJestFormat (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+        at jestAdapter (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+        at runTestInternal (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-runner\build\runTest.js:367:16)
+        at runTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-runner\build\runTest.js:444:34)
+
+      79 |     }
+      80 |   } catch (error) {
+    > 81 |     console.error("Error fetching notes:", error);
+         |             ^
+      82 |     notesByGroup = [];
+      83 |     return null;
+      84 |   }
+
+      at sortNotesByLookUp (anp-19-dice/lib/utils.js:81:13)
+      at Object.<anonymous> (anp-19-dice/test/utils.test.js:103:22)
+
+  console.error
+    Error creating note: Error: Failed to create
+        at Object.<anonymous> (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\anp-19-dice\test\utils.test.js:131:46)
+        at Promise.then.completed (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\utils.js:231:10)
+        at _callCircusTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:316:40)
+        at _runTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:252:3)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:126:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at _runTestsForDescribeBlock (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:121:9)
+        at run (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\run.js:71:3)
+        at runAndTransformResultsToJestFormat (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+        at jestAdapter (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+        at runTestInternal (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-runner\build\runTest.js:367:16)
+        at runTest (C:\Users\ADMIN\OneDrive\Documents\GitHub\amplenote_stg_plugins\node_modules\jest-runner\build\runTest.js:444:34)
+
+      211 |     return newUUID;
+      212 |   } catch (error) {
+    > 213 |     console.error("Error creating note:", error);
+          |             ^
+      214 |     throw error;
+      215 |   }
+      216 | }
+
+      at getNoteUUID (anp-19-dice/lib/utils.js:213:13)
+      at Object.<anonymous> (anp-19-dice/test/utils.test.js:132:9)
+
+node.exe : (node:14212) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:14212) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/utils.test.js
+  utils.js
+    rollDice()
+      Happy Path
+        ΓêÜ should roll basic dice correctly (12 ms)
+        ΓêÜ should apply keep modifier (1 ms)
+        ΓêÜ should apply explode modifier (2 ms)
+      Edge Cases
+        ΓêÜ should handle zero dice (1 ms)
+        ΓêÜ should handle negative faces safely (returns NaN/empty values in JS Math.random) (1 ms)
+      Error Handling
+        ΓêÜ should default options gracefully (1 ms)
+    sortNotesByLookUp()
+      Happy Path
+        ΓêÜ should sort notes by Name (lookUp=1) (27 ms)
+      Edge Cases
+        ΓêÜ should handle negative pickNote via modulo (1 ms)
+      Error Handling
+        ΓêÜ should handle filterNotes returning null (29 ms)
+        ΓêÜ should handle filterNotes throwing error (11 ms)
+    getNoteUUID()
+      Happy Path
+        ΓêÜ should return new UUID when none exists (1 ms)
+      Edge Cases
+        ΓêÜ should handle local- UUID mapping
+      Error Handling
+        ΓêÜ should handle createNote throwing error (5 ms)
+    createAuditReport()
+      Happy Path
+        ΓêÜ should insert note content and navigate (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        1.125 s, estimated 2 s
+Ran all test suites matching /test\\utils.test.js/i.

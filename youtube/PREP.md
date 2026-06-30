@@ -7,8 +7,11 @@
 - **Option B (Benefit-driven):** Boost Your Productivity with Amplenote's Dice Plugin
 
 ### Thumbnail Plan
-- **Visual:** A clean screenshot of the plugin's Tarot Card spread or Decision Matrix in action within Amplenote.
-- **Text:** Bold, readable text like **"MASTER AMPLENOTE DICE"** or **"AMPLENOTE PRO TIP."**
+- **Background:** Use Amplenote's dark mode color (#1E1E1E) as the solid background color.
+- **Text Formatting:**
+  - **"AMPLENOTE PLUGIN:"** must be uppercase, using a vibrant Amplenote blue (#007AFF) or bold accent color, aligned to the center.
+  - The **DICE** plugin name should be placed immediately below it in stark white, extra-large, bold typography.
+- **Visual/Icon:** Place the official Amplenote logo/icon in the bottom right corner of the thumbnail.
 
 ### Description
 
